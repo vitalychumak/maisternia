@@ -6,72 +6,14 @@
 <title>Урок 1. Фара локомотива</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Rubik:wght@500;700&family=Golos+Text:wght@400;600&family=JetBrains+Mono:wght@400;600&display=swap">
-<style>
-/* Layout: одна колонка-«робочий зошит», кроки йдуть як станції на лінії */
-:root{
-  --bg:#eef2f5; --paper:#ffffff; --ink:#1b2430; --mut:#5a6878; --line:#c9d3dc;
-  --signal:#e0a100; --go:#1f8f50; --stop:#cf3d3d; --code-bg:#1d2733; --code-fg:#e6edf3;
-  --display:"Rubik",system-ui,sans-serif; --body:"Golos Text",system-ui,sans-serif; --mono:"JetBrains Mono",ui-monospace,monospace;
-}
-@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
-  --bg:#121820; --paper:#1a222c; --ink:#e7edf3; --mut:#9aa8b6; --line:#2e3a47;
-  --signal:#f2bb2c; --go:#3cbf75; --stop:#ef6262; --code-bg:#0c1117; --code-fg:#e6edf3; color-scheme:dark}}
-:root[data-theme="dark"]{
-  --bg:#121820; --paper:#1a222c; --ink:#e7edf3; --mut:#9aa8b6; --line:#2e3a47;
-  --signal:#f2bb2c; --go:#3cbf75; --stop:#ef6262; --code-bg:#0c1117; --code-fg:#e6edf3; color-scheme:dark}
-*{box-sizing:border-box}
-body{background:var(--bg);color:var(--ink);font:17px/1.6 var(--body);
-  padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:24px 48px}
-main{max-width:720px;margin:0 auto;display:grid;gap:20px}
-h1,h2,h3{font-family:var(--display);text-wrap:balance;line-height:1.2;margin:0}
-h1{font-size:2rem}h2{font-size:1.35rem}h3{font-size:1.05rem}
-p{margin:0}
-.eyebrow{font:600 .8rem var(--body);letter-spacing:.08em;text-transform:uppercase;color:var(--mut)}
-header{display:grid;gap:8px}
-.card{background:var(--paper);border:1px solid var(--line);border-radius:14px;padding:20px;display:grid;gap:12px;min-width:0}
-.steps{display:grid;gap:20px;position:relative}
-.step{display:grid;grid-template-columns:40px 1fr;gap:14px;align-items:start}
-.step .num{width:40px;height:40px;border-radius:50%;background:var(--ink);color:var(--bg);display:grid;place-items:center;font:700 1.1rem var(--display)}
-.step .card{min-width:0}
-code{font-family:var(--mono);font-size:.9em;background:color-mix(in srgb,var(--signal) 18%,transparent);padding:1px 5px;border-radius:5px}
-pre{margin:0;background:var(--code-bg);color:var(--code-fg);border-radius:10px;padding:14px 16px;overflow-x:auto;font:14px/1.55 var(--mono)}
-pre code{background:none;padding:0;font-size:inherit}
-.cm{color:#8fa3b8}
-.codebox{display:grid;gap:8px}
-.copy{justify-self:start;font:600 .9rem var(--body);border:1px solid var(--line);background:var(--paper);color:var(--ink);border-radius:8px;padding:6px 12px;cursor:pointer}
-.copy:focus-visible,button:focus-visible,input:focus-visible{outline:3px solid var(--signal);outline-offset:2px}
-ul,ol{margin:0;padding-left:1.3em;display:grid;gap:6px}
-.table-wrap{overflow-x:auto}
-table{border-collapse:collapse;width:100%;font-size:.95rem}
-th,td{text-align:left;padding:8px 10px;border-bottom:1px solid var(--line);vertical-align:top}
-th{font-family:var(--display);font-weight:500;color:var(--mut)}
-.note{border-left:4px solid var(--signal);padding:10px 14px;background:color-mix(in srgb,var(--signal) 10%,var(--paper));border-radius:0 10px 10px 0}
-.warn{border-left-color:var(--stop);background:color-mix(in srgb,var(--stop) 9%,var(--paper))}
-.demo{display:grid;grid-template-columns:auto 1fr;gap:20px;align-items:center}
-.lamp{width:72px;height:72px;border-radius:50%;border:4px solid var(--line);background:#3a4450;transition:background .05s,box-shadow .05s}
-.lamp.on{background:#fff7d6;box-shadow:0 0 28px 8px color-mix(in srgb,var(--signal) 70%,transparent)}
-.demo label{font-weight:600}
-.demo input[type=range]{width:100%;accent-color:var(--signal)}
-.demo output{font-family:var(--mono)}
-.task{display:grid;grid-template-columns:auto 1fr;gap:12px;align-items:start}
-.task input{width:22px;height:22px;margin-top:3px;accent-color:var(--go)}
-.task.done h3{text-decoration:line-through;color:var(--mut)}
-.badge{display:inline-block;font:600 .75rem var(--body);padding:2px 8px;border-radius:99px;background:color-mix(in srgb,var(--go) 18%,transparent);color:var(--go);margin-left:6px;vertical-align:middle}
-.badge.hard{background:color-mix(in srgb,var(--stop) 16%,transparent);color:var(--stop)}
-details summary{cursor:pointer;font-weight:600}
-details[open] summary{margin-bottom:10px}
-a{color:var(--go)}
-@media (max-width:480px){.step{grid-template-columns:1fr}.step .num{width:34px;height:34px}.demo{grid-template-columns:1fr;justify-items:start}}
-@media (prefers-reduced-motion:reduce){.lamp{transition:none}}
-body{margin:0}img{max-width:100%}
-</style>
+<link rel="stylesheet" href="../assets/lesson.css">
 </head>
-<body>
+<body data-lesson="1">
 
 
 <main>
 <header>
-  <a href="./" style="font-weight:600">← Усі уроки курсу</a>
+  <a href="./" class="back">← Усі уроки курсу</a>
   <div class="eyebrow">Залізниця HO · Урок 1 із серії «Мозок локомотива»</div>
   <h1>Запалюємо фару локомотива</h1>
   <p>Сьогодні ти станеш головним конструктором: збереш схему фари й напишеш програму, яка її вмикає та вимикає. Усе робимо в симуляторі: нічого не згорить, навіть якщо помилишся. Займе 30–45 хвилин.</p>
@@ -230,6 +172,8 @@ void loop() {               <span class="cm">// повторюється зав�
   </details>
   <p>Наступний урок: кнопка вмикає фару, а потім мотор, швидкість якого змінюється ручкою.</p>
 </section>
+
+<nav class="lnav"><a href="./">← Усі уроки</a><a href="urok-2.html">Урок 2. Кнопка машиніста →</a></nav>
 </main>
 
 <script>
@@ -239,23 +183,8 @@ void loop() {               <span class="cm">// повторюється зав�
   function tick(){on=!on;lamp.classList.toggle('on',on);t=setTimeout(tick,+ms.value);}
   ms.addEventListener('input',()=>{out.textContent=ms.value;clearTimeout(t);t=setTimeout(tick,+ms.value);});
   tick();
-
-  document.querySelectorAll('.copy').forEach(b=>b.addEventListener('click',()=>{
-    const el=document.getElementById(b.dataset.target),txt=el.innerText,old=b.textContent;
-    const done=()=>{b.textContent='Скопійовано';setTimeout(()=>b.textContent=old,1500);};
-    if(navigator.clipboard&&navigator.clipboard.writeText){
-      navigator.clipboard.writeText(txt).then(done).catch(()=>sel(el));
-    } else sel(el);
-  }));
-  function sel(el){const r=document.createRange();r.selectNodeContents(el);const s=getSelection();s.removeAllRanges();s.addRange(r);}
-
-  document.querySelectorAll('.task input').forEach(cb=>{
-    const key='lesson1-'+cb.id,task=cb.closest('.task');
-    try{cb.checked=localStorage.getItem(key)==='1';}catch(e){}
-    task.classList.toggle('done',cb.checked);
-    cb.addEventListener('change',()=>{task.classList.toggle('done',cb.checked);try{localStorage.setItem(key,cb.checked?'1':'0');}catch(e){}});
-  });
 })();
 </script>
+<script src="../assets/lesson.js"></script>
 </body>
 </html>

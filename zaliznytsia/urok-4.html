@@ -1,0 +1,253 @@
+<!doctype html>
+<html lang="uk">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Урок 4. ESP32 і телефон</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Rubik:wght@500;700&family=Golos+Text:wght@400;600&family=JetBrains+Mono:wght@400;600&display=swap">
+<link rel="stylesheet" href="../assets/lesson.css">
+<style>
+.radio{display:grid;grid-template-columns:minmax(0,1fr) auto minmax(0,1fr);gap:12px;align-items:center}
+.phone{border:3px solid var(--ink);border-radius:22px;padding:16px 12px;display:grid;gap:10px;text-align:center;max-width:200px;justify-self:center;width:100%}
+.phone h3{font-size:1rem}
+.phone .btn{width:100%}
+.air{display:grid;gap:4px;justify-items:center;color:var(--mut);font:600 .8rem var(--mono);min-width:70px}
+.air .msg{min-height:1.4em;color:var(--go)}
+.esp{display:grid;gap:10px;justify-items:center;text-align:center}
+.chip{border:2px solid var(--line);border-radius:8px;padding:8px 10px;font:600 .85rem var(--mono);background:var(--bg)}
+@media (max-width:520px){.radio{grid-template-columns:1fr}.air{min-height:2em}}
+</style>
+</head>
+<body data-lesson="4">
+<main>
+<header>
+  <a href="./" class="back">← Усі уроки курсу</a>
+  <div class="eyebrow">Залізниця HO · Урок 4 із серії «Мозок локомотива»</div>
+  <h1>ESP32 і телефон</h1>
+  <p>Дроти й кнопки — це добре на столі, але в локомотив, що їде колією, дріт не протягнеш. Сьогодні знайомимось із мозком, який уміє говорити по радіо, і вперше керуємо фарою з телефона. Займе 1–1,5 години.</p>
+</header>
+
+<section class="card">
+  <h2>Знайомся: ESP32</h2>
+  <p>ESP32 — теж контролер, як Arduino, тільки менший, швидший і з вбудованим <b>Wi-Fi</b>. Програмують його тією самою мовою й тими самими командами: <code>pinMode</code>, <code>digitalWrite</code>, <code>delay</code> — усе, що ти вже знаєш, працює.</p>
+  <div class="table-wrap"><table>
+    <thead><tr><th></th><th>Arduino Uno</th><th>ESP32</th></tr></thead>
+    <tbody>
+      <tr><td>Розмір</td><td class="num">69 × 53 мм</td><td class="num">від 21 × 18 мм (як поштова марка)</td></tr>
+      <tr><td>Швидкість</td><td class="num">16 МГц</td><td class="num">160–240 МГц, у 10 разів швидше</td></tr>
+      <tr><td>Wi-Fi і Bluetooth</td><td>немає</td><td>є</td></tr>
+      <tr><td>Влізе в локомотив HO</td><td>ні</td><td>так</td></tr>
+    </tbody>
+  </table></div>
+</section>
+
+<section class="card">
+  <h2>Як телефон розмовляє з локомотивом</h2>
+  <p>ESP32 сам роздає Wi-Fi, як роутер. Телефон під'єднується до цієї мережі й відкриває сторінку, яку показує ESP32. Натиснув кнопку на сторінці — телефон надіслав запит, ESP32 його отримав і ввімкнув фару. Спробуй:</p>
+  <div class="radio">
+    <div class="phone" aria-label="Телефон">
+      <h3>Локомотив 1</h3>
+      <button class="btn go" id="on" type="button">Увімкнути фару</button>
+      <button class="btn stop" id="off" type="button">Вимкнути фару</button>
+    </div>
+    <div class="air" aria-live="polite"><span>Wi-Fi</span><span>· · · · ·</span><span class="msg" id="msg"></span></div>
+    <div class="esp">
+      <div class="lamp" id="lamp" role="img" aria-label="Фара"></div>
+      <div class="chip">ESP32<br>192.168.4.1</div>
+    </div>
+  </div>
+</section>
+
+<section class="card">
+  <p class="part">Частина А · у симуляторі, плата не потрібна</p>
+  <h2>Перша програма для ESP32</h2>
+  <ol>
+    <li>Відкрий <a href="https://wokwi.com/projects/new/esp32" target="_blank" rel="noopener">wokwi.com/projects/new/esp32</a>. Тепер праворуч плата ESP32.</li>
+    <li>Додай світлодіод і резистор 220 Ω. Резистор — до гнізда з підписом <code>D4</code> або <code>4</code>, довга ніжка світлодіода — до резистора, коротка — до <code>GND</code>.</li>
+    <li>Впиши програму і запусти ▶.</li>
+  </ol>
+  <div class="codebox">
+<pre><code id="code1"><span class="cm">// Урок 4, частина А: ESP32 вітається і блимає</span>
+const int FARA = 4;
+
+void setup() {
+  Serial.begin(115200);    <span class="cm">// ESP32 розмовляє швидше, ніж Uno</span>
+  pinMode(FARA, OUTPUT);
+  Serial.println("Привіт! Я ESP32, мозок локомотива.");
+}
+
+void loop() {
+  digitalWrite(FARA, HIGH);
+  delay(500);
+  digitalWrite(FARA, LOW);
+  delay(500);
+}</code></pre>
+    <button class="copy" data-target="code1" type="button">Скопіювати код</button>
+  </div>
+  <p>Фара блимає, а внизу з'явилося привітання. Бачиш? Програма майже така сама, як в уроці 1. Змінилися тільки номер гнізда і швидкість <code>Serial</code>.</p>
+</section>
+
+<section class="card">
+  <p class="part">Частина Б · потрібна справжня плата ESP32</p>
+  <h2>Керуємо фарою з телефона</h2>
+  <p>Тут симулятор уже не допоможе: телефон має під'єднатися до справжньої плати. Цю частину робимо, коли прийде набір деталей.</p>
+</section>
+
+<div class="steps">
+  <div class="step"><div class="num">1</div><div class="card">
+    <h3>Підготуй комп'ютер (разом з дорослим)</h3>
+    <ol>
+      <li>Встанови <b>Arduino IDE</b> з сайту <a href="https://www.arduino.cc/en/software" target="_blank" rel="noopener">arduino.cc/en/software</a>.</li>
+      <li>Відкрий <b>Tools → Board → Boards Manager</b>, знайди <code>esp32</code> і встанови пакет <b>esp32 by Espressif Systems</b>.</li>
+      <li>Під'єднай плату кабелем USB. У <b>Tools → Board</b> вибери свою плату (наприклад, <b>XIAO_ESP32C3</b> або <b>ESP32 Dev Module</b>), у <b>Tools → Port</b> — порт <b>COM</b>, що з'явився.</li>
+    </ol>
+  </div></div>
+
+  <div class="step"><div class="num">2</div><div class="card">
+    <h3>Збери схему на макетці</h3>
+    <p>Так само, як у симуляторі: гніздо <code>4</code> (на XIAO воно підписане <code>D2</code>) → резистор 220 Ω → довга ніжка світлодіода, коротка ніжка → <code>GND</code>.</p>
+  </div></div>
+
+  <div class="step"><div class="num">3</div><div class="card">
+    <h3>Програма: ESP32 роздає Wi-Fi і показує пульт</h3>
+    <div class="codebox">
+<pre><code id="code2"><span class="cm">// Урок 4, частина Б: фара керується з телефона</span>
+#include &lt;WiFi.h&gt;
+#include &lt;WebServer.h&gt;
+
+const int FARA = 4;
+WebServer server(80);      <span class="cm">// «сайт» усередині ESP32</span>
+bool fara = false;
+
+<span class="cm">// Сторінка, яку побачить телефон</span>
+String storinka() {
+  String s = "&lt;!doctype html&gt;&lt;meta charset='utf-8'&gt;";
+  s += "&lt;meta name='viewport' content='width=device-width'&gt;";
+  s += "&lt;style&gt;body{font-family:sans-serif;text-align:center}";
+  s += "a{display:block;margin:16px;padding:24px;font-size:26px;";
+  s += "border-radius:12px;color:#fff;text-decoration:none}&lt;/style&gt;";
+  s += "&lt;h1&gt;Локомотив 1&lt;/h1&gt;&lt;p&gt;Фара: ";
+  if (fara) {
+    s += "УВІМКНЕНА";
+  } else {
+    s += "вимкнена";
+  }
+  s += "&lt;/p&gt;&lt;a href='/on' style='background:#1f8f50'&gt;Увімкнути фару&lt;/a&gt;";
+  s += "&lt;a href='/off' style='background:#cf3d3d'&gt;Вимкнути фару&lt;/a&gt;";
+  return s;
+}
+
+void vidkryly() {          <span class="cm">// телефон відкрив головну сторінку</span>
+  server.send(200, "text/html", storinka());
+}
+
+void uvimknuty() {         <span class="cm">// натиснули «Увімкнути»</span>
+  fara = true;
+  digitalWrite(FARA, HIGH);
+  server.send(200, "text/html", storinka());
+}
+
+void vymknuty() {          <span class="cm">// натиснули «Вимкнути»</span>
+  fara = false;
+  digitalWrite(FARA, LOW);
+  server.send(200, "text/html", storinka());
+}
+
+void setup() {
+  pinMode(FARA, OUTPUT);
+  WiFi.softAP("Lokomotyv-1", "potyag123");   <span class="cm">// назва мережі й пароль</span>
+  server.on("/", vidkryly);
+  server.on("/on", uvimknuty);
+  server.on("/off", vymknuty);
+  server.begin();
+}
+
+void loop() {
+  server.handleClient();   <span class="cm">// слухаємо, чи не прийшла команда</span>
+}</code></pre>
+      <button class="copy" data-target="code2" type="button">Скопіювати код</button>
+    </div>
+    <p>Натисни в Arduino IDE кнопку <b>Upload</b> (стрілка →). Якщо завантаження зависло на «Connecting…», затисни на платі кнопку <b>BOOT</b>, поки не почнеться.</p>
+  </div></div>
+
+  <div class="step"><div class="num">4</div><div class="card">
+    <h3>Під'єднай телефон або планшет</h3>
+    <ol>
+      <li>У налаштуваннях Wi-Fi знайди мережу <b>Lokomotyv-1</b>, пароль <code>potyag123</code>.</li>
+      <li>Відкрий браузер і введи адресу <code>192.168.4.1</code>.</li>
+      <li>Натискай кнопки. Фара на макетці слухається телефона!</li>
+    </ol>
+    <p class="note">iPhone може написати «Немає підключення до інтернету». Це нормально: інтернет тут і не потрібен. Натисни «Використовувати без інтернету» або просто залишайся в цій мережі.</p>
+  </div></div>
+</div>
+
+<section class="card">
+  <h2>Це як у Scratch</h2>
+  <div class="table-wrap"><table>
+    <thead><tr><th>Блок у Scratch</th><th>В Arduino</th></tr></thead>
+    <tbody>
+      <tr><td>Свій блок («Створити блок»)</td><td><code>void uvimknuty() { … }</code> — функція</td></tr>
+      <tr><td>«Коли я отримую повідомлення …»</td><td><code>server.on("/on", uvimknuty);</code></td></tr>
+      <tr><td>«Об'єднати … і …»</td><td><code>s += "…";</code> — дописати текст у кінець</td></tr>
+    </tbody>
+  </table></div>
+</section>
+
+<section class="card">
+  <h2>Завдання конструктора</h2>
+  <p style="color:var(--mut)">Завдання 1 можна зробити в частині А, решту — на справжній платі.</p>
+
+  <div class="task"><input type="checkbox" id="t1" aria-labelledby="t1h"><div>
+    <h3 id="t1h">Привітання з іменем <span class="badge">легко</span></h3>
+    <p>Придумай ім'я своєму локомотиву й зроби так, щоб ESP32 вітався ним, а мережа Wi-Fi називалася так само.</p>
+  </div></div>
+
+  <div class="task"><input type="checkbox" id="t2" aria-labelledby="t2h"><div>
+    <h3 id="t2h">Свій дизайн пульта <span class="badge">легко</span></h3>
+    <p>Зміни кольори кнопок, розмір літер і заголовок сторінки. Кольори записуються так: <code>#1f8f50</code> — зелений, <code>#2266cc</code> — синій. Ти — дизайнер пульта!</p>
+  </div></div>
+
+  <div class="task"><input type="checkbox" id="t3" aria-labelledby="t3h"><div>
+    <h3 id="t3h">Кнопка «Привітатися» <span class="badge mid">середньо</span></h3>
+    <p>Додай третю кнопку з адресою <code>/hello</code>: фара тричі блимає. Тобі знадобиться нова функція і ще один рядок <code>server.on</code>.</p>
+  </div></div>
+
+  <div class="task"><input type="checkbox" id="t4" aria-labelledby="t4h"><div>
+    <h3 id="t4h">Вперед і назад <span class="badge hard">складно</span></h3>
+    <p>Додай червоний задній ліхтар на гніздо <code>5</code>. Кнопки «Вперед» і «Назад»: при «Вперед» горить біла фара, при «Назад» — червона. Майже як у справжньому локомотиві.</p>
+  </div></div>
+</section>
+
+<section class="card">
+  <h2>Перевір себе</h2>
+  <details><summary>Навіщо ESP32 роздає власну мережу Wi-Fi?</summary><p>Щоб локомотив працював будь-де, навіть без домашнього роутера й інтернету, наприклад коли вимкнули світло.</p></details>
+  <details><summary>Що робить <code>server.handleClient()</code> у <code>loop()</code>?</summary><p>Постійно перевіряє, чи не надіслав телефон нову команду. Якщо надіслав — викликає потрібну функцію.</p></details>
+  <details><summary>Що таке <code>192.168.4.1</code>?</summary><p>Адреса ESP32 у його власній мережі, як номер будинку. За нею телефон знаходить сторінку пульта.</p></details>
+</section>
+
+<section class="card">
+  <h2>Для дорослого</h2>
+  <ul>
+    <li>Це спрощена версія прошивки локомотива, яка вже написана: там такий самий вебсервер, але з ручкою швидкості, плавним розгоном, контролем акумулятора й зупинкою при втраті зв'язку.</li>
+    <li>Ваш Windows-комп'ютер може попросити драйвер тільки для плат з окремим чипом USB (CH340, CP2102). ESP32-C3 і ESP32-S3 з вбудованим USB працюють без драйвера.</li>
+    <li>Пізніше локомотиви говоритимуть не з телефоном напряму, а через станцію. Тоді один пульт керуватиме всіма поїздами.</li>
+  </ul>
+</section>
+
+<nav class="lnav"><a href="urok-3.html">← Урок 3. Мотор і швидкість</a><a href="urok-5.html">Урок 5. Локомотив без дротів →</a></nav>
+</main>
+<script>
+(function(){
+  const lamp=document.getElementById('lamp'),msg=document.getElementById('msg');
+  function send(on){
+    msg.textContent='GET /'+(on?'on':'off')+' →';
+    setTimeout(()=>{lamp.classList.toggle('on',on);msg.textContent='OK ✓';},350);
+  }
+  document.getElementById('on').addEventListener('click',()=>send(true));
+  document.getElementById('off').addEventListener('click',()=>send(false));
+})();
+</script>
+<script src="../assets/lesson.js"></script>
+</body>
+</html>

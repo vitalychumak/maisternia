@@ -1,0 +1,246 @@
+<!doctype html>
+<html lang="uk">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Урок 3. Мотор і швидкість</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Rubik:wght@500;700&family=Golos+Text:wght@400;600&family=JetBrains+Mono:wght@400;600&display=swap">
+<link rel="stylesheet" href="../assets/lesson.css">
+<style>
+.pwm{display:grid;gap:14px}
+.pwm-top{display:grid;grid-template-columns:auto 1fr;gap:20px;align-items:center}
+.wheel{width:90px;height:90px;color:var(--ink)}
+#wave{width:100%;height:70px;display:block;border:1px solid var(--line);border-radius:8px;background:var(--bg)}
+.pwm label{font-weight:600}
+.pwm input[type=range]{width:100%;accent-color:var(--signal)}
+.check{display:flex;gap:8px;align-items:center;font-weight:600}
+.check input{width:20px;height:20px;accent-color:var(--go)}
+@media (max-width:480px){.pwm-top{grid-template-columns:1fr;justify-items:start}}
+</style>
+</head>
+<body data-lesson="3">
+<main>
+<header>
+  <a href="./" class="back">← Усі уроки курсу</a>
+  <div class="eyebrow">Залізниця HO · Урок 3 із серії «Мозок локомотива»</div>
+  <h1>Мотор і швидкість</h1>
+  <p>Фару можна тільки ввімкнути або вимкнути. А поїзд має їхати то повільно, то швидко, плавно рушати й плавно гальмувати. Сьогодні дізнаєшся, як контролер, який уміє тільки «так» і «ні», керує швидкістю. Займе 45–60 хвилин.</p>
+</header>
+
+<section class="card">
+  <h2>Секрет: дуже швидке миготіння</h2>
+  <p>Контролер не вміє подати «половину» напруги. Зате він може вмикати й вимикати мотор сотні разів за секунду. Якщо мотор увімкнений половину часу, він крутиться приблизно на половину швидкості. Це називається <b>ШІМ</b> (широтно-імпульсна модуляція). Колеса й мотор важкі, тому не встигають помітити миготіння.</p>
+  <div class="pwm">
+    <div class="pwm-top">
+      <svg class="wheel" id="wheel" viewBox="-50 -50 100 100" role="img" aria-label="Колесо локомотива">
+        <circle r="44" fill="none" stroke="currentColor" stroke-width="6"></circle>
+        <circle r="8" fill="currentColor"></circle>
+        <g stroke="currentColor" stroke-width="5" stroke-linecap="round">
+          <line x1="0" y1="-40" x2="0" y2="40"></line><line x1="-40" y1="0" x2="40" y2="0"></line>
+          <line x1="-28" y1="-28" x2="28" y2="28"></line><line x1="-28" y1="28" x2="28" y2="-28"></line>
+        </g>
+        <circle cx="0" cy="-30" r="6" fill="var(--stop)"></circle>
+      </svg>
+      <div style="display:grid;gap:6px;min-width:0">
+        <label for="duty">Ручка швидкості: <output id="dutyOut" class="mono">40</output>% часу ввімкнено</label>
+        <input type="range" id="duty" min="0" max="100" value="40">
+        <label class="check"><input type="checkbox" id="smooth" checked> Плавний розгін і гальмування</label>
+      </div>
+    </div>
+    <canvas id="wave" aria-label="Графік ШІМ: коли мотор увімкнений, а коли ні"></canvas>
+    <p style="color:var(--mut);font-size:.95rem">Верхня лінія — мотор увімкнений, нижня — вимкнений. Посунь ручку і подивись, як змінюється ширина «сходинок». Вимкни плавний розгін — колесо стрибатиме, як іграшка. Увімкни — рушатиме, як справжній поїзд.</p>
+  </div>
+</section>
+
+<section class="card">
+  <h2>Чому не можна під'єднати мотор прямо до контролера</h2>
+  <p>Гніздо контролера дає зовсім маленький струм, приблизно як для одного світлодіода. Моторові потрібно в десятки разів більше. Тому між ними ставлять <b>драйвер мотора</b>: контролер — це <b>мозок</b>, який командує, а драйвер — <b>м'язи</b>, які виконують. У нашому локомотиві буде драйвер DRV8833, маленька плата розміром з ніготь.</p>
+  <p>У симуляторі мотора немає, тому замість нього візьмемо світлодіод: його <b>яскравість</b> буде нашою <b>швидкістю</b>. Програма для справжнього мотора майже така сама.</p>
+</section>
+
+<div class="steps">
+  <div class="step"><div class="num">1</div><div class="card">
+    <h3>Нова схема</h3>
+    <p>Створи новий проєкт: <a href="https://wokwi.com/projects/new/arduino-uno" target="_blank" rel="noopener">wokwi.com/projects/new/arduino-uno</a>.</p>
+    <ol>
+      <li>Світлодіод з резистором 220 Ω, але тепер на гніздо <code>9</code>. Біля номера 9 на платі намальована хвилька <code>~</code>: так позначені гнізда, які вміють ШІМ.</li>
+      <li>Додай <b>Potentiometer</b> (крутилка). Це наша ручка контролера машиніста.</li>
+      <li>У крутилки три ніжки: <code>VCC</code> → гніздо <code>5V</code>, <code>GND</code> → <code>GND</code>, середня <code>SIG</code> → гніздо <code>A0</code>.</li>
+    </ol>
+  </div></div>
+
+  <div class="step"><div class="num">2</div><div class="card">
+    <h3>Програма 1: ручка керує швидкістю</h3>
+    <div class="codebox">
+<pre><code id="code1"><span class="cm">// Урок 3, програма 1: ручка швидкості</span>
+const int MOTOR = 9;     <span class="cm">// поки що світлодіод замість мотора</span>
+const int RUCHKA = A0;   <span class="cm">// крутилка</span>
+
+void setup() {
+  pinMode(MOTOR, OUTPUT);
+  Serial.begin(9600);
+}
+
+void loop() {
+  int pozytsiia = analogRead(RUCHKA);                  <span class="cm">// від 0 до 1023</span>
+  int shvydkist = map(pozytsiia, 0, 1023, 0, 255);     <span class="cm">// перерахувати в 0..255</span>
+  analogWrite(MOTOR, shvydkist);                       <span class="cm">// ШІМ: 0 = стоп, 255 = повний хід</span>
+  Serial.println(shvydkist);
+  delay(20);
+}</code></pre>
+      <button class="copy" data-target="code1" type="button">Скопіювати код</button>
+    </div>
+    <p>Запусти ▶, натисни на крутилку й крути її. Світлодіод стає яскравішим або тьмянішим, а внизу видно число швидкості.</p>
+    <p class="note"><b>Нові команди.</b> <code>analogRead</code> читає не «так/ні», а число від 0 до 1023 (наскільки повернута ручка). <code>map</code> перераховує одну шкалу в іншу. <code>analogWrite</code> вмикає ШІМ: число від 0 до 255 означає, яку частину часу гніздо ввімкнене.</p>
+  </div></div>
+
+  <div class="step"><div class="num">3</div><div class="card">
+    <h3>Програма 2: плавний розгін, як у справжнього поїзда</h3>
+    <p>Справжній поїзд важкий: він не може миттєво розігнатися чи зупинитися. Зробимо так, щоб швидкість наближалася до положення ручки потроху, крок за кроком.</p>
+    <div class="codebox">
+<pre><code id="code2"><span class="cm">// Урок 3, програма 2: плавний розгін і гальмування</span>
+const int MOTOR = 9;
+const int RUCHKA = A0;
+int potochna = 0;        <span class="cm">// швидкість, з якою їдемо зараз</span>
+
+void setup() {
+  pinMode(MOTOR, OUTPUT);
+  Serial.begin(9600);
+}
+
+void loop() {
+  int tsil = map(analogRead(RUCHKA), 0, 1023, 0, 255);  <span class="cm">// куди хоче машиніст</span>
+
+  if (potochna &lt; tsil) {
+    potochna = potochna + 1;   <span class="cm">// розганяємось на один крок</span>
+  }
+  if (potochna &gt; tsil) {
+    potochna = potochna - 1;   <span class="cm">// гальмуємо на один крок</span>
+  }
+
+  analogWrite(MOTOR, potochna);
+  Serial.println(potochna);
+  delay(10);                   <span class="cm">// більше число — повільніший розгін</span>
+}</code></pre>
+      <button class="copy" data-target="code2" type="button">Скопіювати код</button>
+    </div>
+    <p>Різко поверни ручку до кінця. Світлодіод розгоряється поступово, приблизно за 2,5 секунди. Саме так працюватиме наш локомотив.</p>
+  </div></div>
+</div>
+
+<section class="card">
+  <h2>Це як у Scratch</h2>
+  <div class="table-wrap"><table>
+    <thead><tr><th>Блок у Scratch</th><th>В Arduino</th></tr></thead>
+    <tbody>
+      <tr><td>«Значення гучності» або повзунок змінної</td><td><code>analogRead(RUCHKA)</code></td></tr>
+      <tr><td>«Змінити ефект привид на …»</td><td><code>analogWrite(MOTOR, shvydkist)</code></td></tr>
+      <tr><td>«Змінити potochna на 1»</td><td><code>potochna = potochna + 1;</code></td></tr>
+      <tr><td>Блок «&lt;» і «&gt;»</td><td><code>potochna &lt; tsil</code></td></tr>
+    </tbody>
+  </table></div>
+</section>
+
+<section class="card">
+  <h2>Завдання конструктора</h2>
+  <p style="color:var(--mut)">Познач галочкою те, що вийшло.</p>
+
+  <div class="task"><input type="checkbox" id="t1" aria-labelledby="t1h"><div>
+    <h3 id="t1h">Важкий товарний поїзд <span class="badge">легко</span></h3>
+    <p>Зроби розгін утричі повільнішим, ніби поїзд везе 50 вагонів з вугіллям.</p>
+  </div></div>
+
+  <div class="task"><input type="checkbox" id="t2" aria-labelledby="t2h"><div>
+    <h3 id="t2h">Гальма сильніші за двигун <span class="badge mid">середньо</span></h3>
+    <p>У справжнього поїзда гальма спрацьовують швидше, ніж він розганяється. Зроби так, щоб при гальмуванні швидкість зменшувалась на 3 кроки, а при розгоні збільшувалась на 1. Обережно: подумай, що буде, якщо <code>potochna</code> стане менше нуля.</p>
+  </div></div>
+
+  <div class="task"><input type="checkbox" id="t3" aria-labelledby="t3h"><div>
+    <h3 id="t3h">Поштовх на старті <span class="badge mid">середньо</span></h3>
+    <p>Справжній мотор на дуже малій швидкості гуде, але не рушає. Зроби так: якщо ручка трохи повернута (ціль більша за 0, але менша за 40), швидкість одразу стає 40.</p>
+  </div></div>
+
+  <div class="task"><input type="checkbox" id="t4" aria-labelledby="t4h"><div>
+    <h3 id="t4h">Аварійна зупинка <span class="badge hard">складно</span></h3>
+    <p>Додай кнопку з уроку 2. Натиснув — поїзд зупиняється <b>одразу</b>, без плавного гальмування (<code>potochna = 0</code>), і стоїть, поки ручку не повернеш на нуль. Така кнопка буде і на нашій станції.</p>
+  </div></div>
+</section>
+
+<section class="card">
+  <h2>Перевір себе</h2>
+  <details><summary>Що таке ШІМ простими словами?</summary><p>Дуже швидке вмикання й вимикання. Чим довше «ввімкнено» в кожному миготінні, тим швидше крутиться мотор і яскравіше світить світлодіод.</p></details>
+  <details><summary>Навіщо драйвер мотора?</summary><p>Контролер дає занадто малий струм для мотора. Драйвер отримує команду від контролера й подає на мотор великий струм від акумулятора.</p></details>
+  <details><summary>Що змінити, щоб поїзд розганявся швидше?</summary><p>Зменшити число в <code>delay</code> або збільшувати <code>potochna</code> більшими кроками.</p></details>
+</section>
+
+<section class="card">
+  <h2>Для дорослого</h2>
+  <ul>
+    <li>Програма 2 — це спрощена версія розгону в прошивці нашого локомотива: там так само є «поточна» і «цільова» швидкість, а крок залежить від налаштувань розгону й гальмування.</li>
+    <li>На Arduino Uno ШІМ на гнізді 9 має частоту близько 490 Гц, тому справжній мотор на ньому тихо пищатиме. У локомотиві ми використаємо 20 кГц, цього вже не чути.</li>
+    <li>Коли прийде набір, програму можна перевірити з маленьким мотором 3–6 В через модуль драйвера DRV8833. <b>Не під'єднуйте мотор напряму до гнізда Arduino.</b></li>
+  </ul>
+  <details><summary>Готова схема (diagram.json)</summary>
+    <div class="codebox">
+<pre><code id="code3">{
+  "version": 1,
+  "author": "maisternia",
+  "editor": "wokwi",
+  "parts": [
+    { "type": "wokwi-arduino-uno", "id": "uno", "top": 0, "left": 0, "attrs": {} },
+    { "type": "wokwi-led", "id": "led1", "top": -130, "left": 170, "attrs": { "color": "yellow" } },
+    { "type": "wokwi-resistor", "id": "r1", "top": -60, "left": 220, "rotate": 90, "attrs": { "value": "220" } },
+    { "type": "wokwi-potentiometer", "id": "pot1", "top": 240, "left": 60, "attrs": {} }
+  ],
+  "connections": [
+    [ "uno:9", "r1:2", "green", [] ],
+    [ "r1:1", "led1:A", "green", [] ],
+    [ "led1:C", "uno:GND.1", "black", [] ],
+    [ "pot1:VCC", "uno:5V", "red", [] ],
+    [ "pot1:GND", "uno:GND.2", "black", [] ],
+    [ "pot1:SIG", "uno:A0", "orange", [] ]
+  ],
+  "dependencies": {}
+}</code></pre>
+      <button class="copy" data-target="code3" type="button">Скопіювати схему</button>
+    </div>
+  </details>
+</section>
+
+<nav class="lnav"><a href="urok-2.html">← Урок 2. Кнопка машиніста</a><a href="urok-4.html">Урок 4. ESP32 і телефон →</a></nav>
+</main>
+<script>
+(function(){
+  const duty=document.getElementById('duty'),out=document.getElementById('dutyOut'),smooth=document.getElementById('smooth');
+  const wheel=document.getElementById('wheel'),cv=document.getElementById('wave'),ctx=cv.getContext('2d');
+  const reduce=matchMedia('(prefers-reduced-motion: reduce)').matches;
+  let cur=+duty.value,angle=0;
+  function css(v){return getComputedStyle(document.documentElement).getPropertyValue(v).trim();}
+  function draw(){
+    const w=cv.clientWidth,h=cv.clientHeight,dpr=devicePixelRatio||1;
+    if(cv.width!==w*dpr){cv.width=w*dpr;cv.height=h*dpr;}
+    ctx.setTransform(dpr,0,0,dpr,0,0);ctx.clearRect(0,0,w,h);
+    const period=48,hi=12,lo=h-12,d=cur/100;
+    ctx.strokeStyle=css('--go');ctx.lineWidth=3;ctx.beginPath();
+    for(let x=0;x<w;x+=period){
+      const on=period*d;
+      ctx.lineTo(x,d>0?hi:lo);ctx.lineTo(x+on,d>0?hi:lo);
+      ctx.lineTo(x+on,d<1?lo:hi);ctx.lineTo(x+period,d<1?lo:hi);
+    }
+    ctx.stroke();
+  }
+  function frame(){
+    const target=+duty.value;
+    if(smooth.checked){if(cur<target)cur=Math.min(target,cur+0.6);else if(cur>target)cur=Math.max(target,cur-0.9);}
+    else cur=target;
+    if(!reduce){angle=(angle+cur*0.12)%360;wheel.style.transform='rotate('+angle+'deg)';}
+    draw();requestAnimationFrame(frame);
+  }
+  duty.addEventListener('input',()=>{out.textContent=duty.value;});
+  frame();
+})();
+</script>
+<script src="../assets/lesson.js"></script>
+</body>
+</html>

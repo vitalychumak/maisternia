@@ -1,0 +1,206 @@
+<!doctype html>
+<html lang="uk">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Урок 2. Кнопка машиніста</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Rubik:wght@500;700&family=Golos+Text:wght@400;600&family=JetBrains+Mono:wght@400;600&display=swap">
+<link rel="stylesheet" href="../assets/lesson.css">
+</head>
+<body data-lesson="2">
+<main>
+<header>
+  <a href="./" class="back">← Усі уроки курсу</a>
+  <div class="eyebrow">Залізниця HO · Урок 2 із серії «Мозок локомотива»</div>
+  <h1>Кнопка машиніста</h1>
+  <p>Минулого разу фара блимала сама. Сьогодні нею керуватимеш ти: натиснув кнопку — фара загорілась, натиснув ще раз — згасла. Для цього контролер має навчитися <b>слухати</b>, а не тільки говорити. Займе 40–50 хвилин.</p>
+</header>
+
+<section class="card">
+  <h2>Вихід і вхід</h2>
+  <p>У контролера є гнізда, які можуть працювати двома способами:</p>
+  <ul>
+    <li><b>Вихід</b> (<code>OUTPUT</code>) — контролер <b>говорить</b>: вмикає фару, мотор, звук. Це ти робив в уроці 1.</li>
+    <li><b>Вхід</b> (<code>INPUT</code>) — контролер <b>слухає</b>: чи натиснута кнопка, чи проїхав поїзд повз датчик.</li>
+  </ul>
+  <p>У справжньому локомотиві входи потрібні всюди: кнопки в кабіні машиніста, датчики на колії, датчик заряду акумулятора.</p>
+</section>
+
+<section class="card">
+  <h2>Спробуй: кнопка-перемикач</h2>
+  <div class="demo">
+    <div class="lamp" id="lamp" role="img" aria-label="Фара"></div>
+    <div style="display:grid;gap:10px;justify-items:start">
+      <button class="btn" id="press" type="button">Натиснути кнопку</button>
+      <p class="mono">faraUvimknena = <b id="state">false</b></p>
+      <p style="color:var(--mut);font-size:.95rem">Контролер пам'ятає, чи ввімкнена фара, у <b>змінній</b>. Кожне натискання перемикає її: <code>false</code> (ні) ↔ <code>true</code> (так).</p>
+    </div>
+  </div>
+</section>
+
+<div class="steps">
+  <div class="step"><div class="num">1</div><div class="card">
+    <h3>Відкрий свій проєкт з уроку 1</h3>
+    <p>Якщо ти його зберіг у Wokwi — відкрий. Якщо ні, збери знову: світлодіод з резистором 220 Ω на гнізді <code>13</code>, коротка ніжка в <code>GND</code>.</p>
+  </div></div>
+
+  <div class="step"><div class="num">2</div><div class="card">
+    <h3>Додай кнопку</h3>
+    <ol>
+      <li>Натисни <b>«+»</b> і знайди <b>Pushbutton</b> (кнопка).</li>
+      <li>У кнопки чотири ніжки, але працюють вони парами: ліва верхня з'єднана з правою верхньою, ліва нижня — з правою нижньою. Натиснув — і верхня пара з'єдналася з нижньою.</li>
+      <li>Одну <b>ліву</b> ніжку з'єднай із гніздом <code>2</code>, другу <b>ліву</b> — з <code>GND</code>.</li>
+    </ol>
+    <p class="note">Резистор для кнопки не потрібен: контролер має свій, вбудований. Його вмикає слово <code>INPUT_PULLUP</code> у програмі.</p>
+  </div></div>
+
+  <div class="step"><div class="num">3</div><div class="card">
+    <h3>Програма 1: фара горить, поки тримаєш кнопку</h3>
+    <div class="codebox">
+<pre><code id="code1"><span class="cm">// Урок 2, програма 1: фара горить, поки натиснута кнопка</span>
+const int FARA = 13;
+const int KNOPKA = 2;
+
+void setup() {
+  pinMode(FARA, OUTPUT);
+  pinMode(KNOPKA, INPUT_PULLUP);  <span class="cm">// гніздо 2 слухає кнопку</span>
+}
+
+void loop() {
+  if (digitalRead(KNOPKA) == LOW) {  <span class="cm">// якщо кнопку натиснуто</span>
+    digitalWrite(FARA, HIGH);        <span class="cm">// увімкнути фару</span>
+  } else {                           <span class="cm">// інакше</span>
+    digitalWrite(FARA, LOW);         <span class="cm">// вимкнути фару</span>
+  }
+}</code></pre>
+      <button class="copy" data-target="code1" type="button">Скопіювати код</button>
+    </div>
+    <p>Запусти ▶ і натискай кнопку мишкою. Тримаєш — горить, відпустив — згасла.</p>
+    <p class="note"><b>Чому натиснута — це <code>LOW</code>?</b> Вбудований резистор тримає гніздо в стані <code>HIGH</code>. Коли натискаєш кнопку, вона з'єднує гніздо з <code>GND</code>, і там стає <code>LOW</code>. Трохи навпаки, просто запам'ятай: <b>натиснуто = LOW</b>.</p>
+  </div></div>
+
+  <div class="step"><div class="num">4</div><div class="card">
+    <h3>Програма 2: справжній перемикач</h3>
+    <p>Машиніст не триматиме кнопку всю дорогу. Зробимо як у демо вгорі: одне натискання — увімкнути, наступне — вимкнути.</p>
+    <div class="codebox">
+<pre><code id="code2"><span class="cm">// Урок 2, програма 2: кнопка-перемикач</span>
+const int FARA = 13;
+const int KNOPKA = 2;
+bool faraUvimknena = false;        <span class="cm">// змінна: чи горить фара (спочатку ні)</span>
+
+void setup() {
+  pinMode(FARA, OUTPUT);
+  pinMode(KNOPKA, INPUT_PULLUP);
+}
+
+void loop() {
+  if (digitalRead(KNOPKA) == LOW) {          <span class="cm">// кнопку натиснули</span>
+    faraUvimknena = !faraUvimknena;          <span class="cm">// ! означає «навпаки»</span>
+    if (faraUvimknena) {
+      digitalWrite(FARA, HIGH);
+    } else {
+      digitalWrite(FARA, LOW);
+    }
+    delay(50);                               <span class="cm">// чекаємо, поки контакти «заспокояться»</span>
+    while (digitalRead(KNOPKA) == LOW) { }   <span class="cm">// чекаємо, поки кнопку відпустять</span>
+    delay(50);
+  }
+}</code></pre>
+      <button class="copy" data-target="code2" type="button">Скопіювати код</button>
+    </div>
+    <p class="note"><b>Навіщо <code>while</code>?</b> Контролер дуже швидкий: поки твій палець натискає кнопку, <code>loop()</code> встигає пробігти тисячі разів і перемкнути фару тисячі разів. Тому ми чекаємо, поки кнопку відпустять. А <code>delay(50)</code> потрібен, бо справжні контакти кнопки при натисканні кілька мілісекунд «тремтять».</p>
+  </div></div>
+</div>
+
+<section class="card">
+  <h2>Це як у Scratch</h2>
+  <div class="table-wrap"><table>
+    <thead><tr><th>Блок у Scratch</th><th>В Arduino</th></tr></thead>
+    <tbody>
+      <tr><td>«Якщо … то … інакше»</td><td><code>if (…) { … } else { … }</code></td></tr>
+      <tr><td>«Клавішу пропуск натиснуто?»</td><td><code>digitalRead(KNOPKA) == LOW</code></td></tr>
+      <tr><td>«Чекати до …»</td><td><code>while (…) { }</code> — крутиться, поки умова правдива</td></tr>
+      <tr><td>Змінна «так/ні»</td><td><code>bool faraUvimknena = false;</code></td></tr>
+      <tr><td>Блок «не»</td><td><code>!</code></td></tr>
+    </tbody>
+  </table></div>
+  <p style="color:var(--mut)">Зверни увагу: «дорівнює» в умові пишеться двома знаками <code>==</code>. Один знак <code>=</code> означає «покласти значення в змінну».</p>
+</section>
+
+<section class="card">
+  <h2>Завдання конструктора</h2>
+  <p style="color:var(--mut)">Познач галочкою те, що вийшло.</p>
+
+  <div class="task"><input type="checkbox" id="t1" aria-labelledby="t1h"><div>
+    <h3 id="t1h">Дві кнопки <span class="badge">легко</span></h3>
+    <p>Додай другу кнопку на гніздо <code>3</code>. Зелена кнопка вмикає фару, червона — вимикає. (Колір кнопки змінюється в її налаштуваннях у Wokwi.)</p>
+  </div></div>
+
+  <div class="task"><input type="checkbox" id="t2" aria-labelledby="t2h"><div>
+    <h3 id="t2h">Лічильник натискань <span class="badge mid">середньо</span></h3>
+    <p>Зроби змінну <code>int skilky = 0;</code> і збільшуй її при кожному натисканні: <code>skilky = skilky + 1;</code>. Щоб побачити число, додай у <code>setup()</code> рядок <code>Serial.begin(9600);</code>, а після натискання — <code>Serial.println(skilky);</code>. Числа з'являться у вікні під платою.</p>
+  </div></div>
+
+  <div class="task"><input type="checkbox" id="t3" aria-labelledby="t3h"><div>
+    <h3 id="t3h">Гудок-сигнал <span class="badge mid">середньо</span></h3>
+    <p>Поки тримаєш кнопку, фара швидко блимає (як попереджувальний сигнал). Відпустив — згасла.</p>
+  </div></div>
+
+  <div class="task"><input type="checkbox" id="t4" aria-labelledby="t4h"><div>
+    <h3 id="t4h">Три режими <span class="badge hard">складно</span></h3>
+    <p>Одна кнопка перемикає по колу три режими: «вимкнено» → «фара горить» → «фара блимає» → знову «вимкнено». Підказка: замість <code>bool</code> візьми <code>int rezhym = 0;</code> і після кожного натискання збільшуй його, а коли стане 3 — повертай до 0.</p>
+  </div></div>
+</section>
+
+<section class="card">
+  <h2>Перевір себе</h2>
+  <details><summary>Яка різниця між <code>OUTPUT</code> і <code>INPUT_PULLUP</code>?</summary><p><code>OUTPUT</code> — контролер сам подає сигнал (вмикає щось). <code>INPUT_PULLUP</code> — контролер слухає, що відбувається на гнізді, і тримає його в <code>HIGH</code>, поки кнопка не з'єднає його з <code>GND</code>.</p></details>
+  <details><summary>Що буде без <code>while</code> у програмі 2?</summary><p>Фара перемикатиметься багато разів, поки тримаєш кнопку, і загориться чи згасне випадково.</p></details>
+  <details><summary>Чим відрізняються <code>=</code> і <code>==</code>?</summary><p><code>=</code> кладе значення в змінну. <code>==</code> перевіряє, чи два значення однакові.</p></details>
+</section>
+
+<section class="card">
+  <h2>Для дорослого</h2>
+  <ul>
+    <li>Ключові ідеї уроку: цифровий вхід, підтягувальний резистор (pull-up), змінна стану, брязкіт контактів (debounce). Усе це знадобиться для кнопки аварійної зупинки на станції.</li>
+    <li>Якщо схема не збирається, замініть вміст вкладки <code>diagram.json</code> у Wokwi на текст нижче.</li>
+  </ul>
+  <details><summary>Готова схема (diagram.json)</summary>
+    <div class="codebox">
+<pre><code id="code3">{
+  "version": 1,
+  "author": "maisternia",
+  "editor": "wokwi",
+  "parts": [
+    { "type": "wokwi-arduino-uno", "id": "uno", "top": 0, "left": 0, "attrs": {} },
+    { "type": "wokwi-led", "id": "led1", "top": -130, "left": 140, "attrs": { "color": "white" } },
+    { "type": "wokwi-resistor", "id": "r1", "top": -60, "left": 190, "rotate": 90, "attrs": { "value": "220" } },
+    { "type": "wokwi-pushbutton", "id": "btn1", "top": -110, "left": 260, "attrs": { "color": "green" } }
+  ],
+  "connections": [
+    [ "uno:13", "r1:2", "green", [] ],
+    [ "r1:1", "led1:A", "green", [] ],
+    [ "led1:C", "uno:GND.1", "black", [] ],
+    [ "uno:2", "btn1:1.l", "blue", [] ],
+    [ "btn1:2.l", "uno:GND.1", "black", [] ]
+  ],
+  "dependencies": {}
+}</code></pre>
+      <button class="copy" data-target="code3" type="button">Скопіювати схему</button>
+    </div>
+  </details>
+</section>
+
+<nav class="lnav"><a href="urok-1.html">← Урок 1. Фара</a><a href="urok-3.html">Урок 3. Мотор і швидкість →</a></nav>
+</main>
+<script>
+(function(){
+  const lamp=document.getElementById('lamp'),st=document.getElementById('state');
+  let on=false;
+  document.getElementById('press').addEventListener('click',()=>{on=!on;lamp.classList.toggle('on',on);st.textContent=on?'true':'false';});
+})();
+</script>
+<script src="../assets/lesson.js"></script>
+</body>
+</html>

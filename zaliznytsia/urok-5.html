@@ -1,0 +1,168 @@
+<!doctype html>
+<html lang="uk">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Урок 5. Локомотив без дротів</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Rubik:wght@500;700&family=Golos+Text:wght@400;600&family=JetBrains+Mono:wght@400;600&display=swap">
+<link rel="stylesheet" href="../assets/lesson.css">
+<style>
+.chain{display:grid;gap:8px}
+.node{display:grid;grid-template-columns:120px 1fr;gap:12px;align-items:start;padding:10px 12px;border:1px solid var(--line);border-radius:10px;background:var(--bg)}
+.node b{font-family:var(--display)}
+.node .role{font:600 .8rem var(--body);letter-spacing:.05em;text-transform:uppercase;color:var(--go)}
+.arrow{justify-self:center;color:var(--mut);line-height:1}
+.calc{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:12px}
+.calc label{display:grid;gap:4px;font-weight:600}
+.calc input{font:1.1rem var(--mono);padding:8px 10px;border:1px solid var(--line);border-radius:8px;background:var(--bg);color:var(--ink);width:100%}
+.result{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:12px}
+.result div{padding:12px;border-radius:10px;background:var(--bg);display:grid;gap:2px}
+.result .big{font:700 1.8rem var(--display);font-variant-numeric:tabular-nums}
+.result small{color:var(--mut)}
+.log td{height:2.2em}
+@media (max-width:480px){.node{grid-template-columns:1fr}}
+</style>
+</head>
+<body data-lesson="5">
+<main>
+<header>
+  <a href="./" class="back">← Усі уроки курсу</a>
+  <div class="eyebrow">Залізниця HO · Урок 5 із серії «Мозок локомотива»</div>
+  <h1>Локомотив без дротів</h1>
+  <p>Усе, що ти вивчив, — фара, кнопка, швидкість, Wi-Fi — збирається в одному місці: всередині справжньої моделі локомотива. Рейки будуть без струму, тож локомотив їздитиме на власному акумуляторі. Збирає дорослий, а ти — <b>головний випробувач</b>.</p>
+</header>
+
+<section class="card">
+  <p class="note">Цей урок — для дня, коли локомотив уже зібраний. До того можна прочитати, як він влаштований, і потренуватися на калькуляторі швидкості.</p>
+</section>
+
+<section class="card">
+  <h2>Що всередині локомотива</h2>
+  <div class="chain">
+    <div class="node"><span class="role">Бак</span><div><b>Акумулятор LiPo</b><br>Запас енергії. 3,7 вольта, важить приблизно як дві монети.</div></div>
+    <div class="arrow">↓</div>
+    <div class="node"><span class="role">Охоронець</span><div><b>Плата заряду й захисту</b><br>Заряджає акумулятор і не дає йому розрядитися занадто сильно чи перегрітися.</div></div>
+    <div class="arrow">↓</div>
+    <div class="node"><span class="role">Мозок</span><div><b>ESP32</b><br>Виконує програму, слухає телефон, рахує розгін, вмикає фари.</div></div>
+    <div class="arrow">↓</div>
+    <div class="node"><span class="role">Підсилювач</span><div><b>Перетворювач напруги</b><br>Піднімає 3,7 вольта до 9: моторові моделі потрібно більше, ніж дає акумулятор.</div></div>
+    <div class="arrow">↓</div>
+    <div class="node"><span class="role">М'язи</span><div><b>Драйвер мотора</b><br>Отримує команди ШІМ від мозку й подає на мотор великий струм (урок 3).</div></div>
+    <div class="arrow">↓</div>
+    <div class="node"><span class="role">Ноги</span><div><b>Мотор і колеса</b><br>Мотор крутить колеса через маленькі шестерні.</div></div>
+  </div>
+  <p>А ще — дві фари (білі спереду, червоні ззаду), які вмикаються залежно від напрямку, як у завданні з уроку 4.</p>
+</section>
+
+<section class="card">
+  <h2>Правила безпеки з акумулятором</h2>
+  <p class="note warn">Акумулятор LiPo маленький, але в ньому багато енергії. Якщо його пошкодити, він може сильно нагрітися й навіть загорітися. Тому:</p>
+  <ul>
+    <li><b>Заряджає тільки дорослий</b>, на негорючій поверхні, і не залишає без нагляду.</li>
+    <li>Акумулятор не можна згинати, проколювати, кидати й нагрівати.</li>
+    <li>Якщо акумулятор <b>роздувся</b>, став м'яким чи дивно пахне — ним більше не користуємося і кажемо дорослому.</li>
+    <li>Локомотив, що став гарячим, одразу зупиняємо й кличемо дорослого.</li>
+  </ul>
+</section>
+
+<section class="card">
+  <h2>Пульт локомотива</h2>
+  <ol>
+    <li>Під'єднай телефон або планшет до Wi-Fi мережі <b>Loco-…</b> (точну назву й пароль скаже дорослий).</li>
+    <li>Відкрий у браузері адресу <code>192.168.4.1</code>.</li>
+    <li>На пульті є: повзунок швидкості, кнопки «Вперед» і «Назад», «Стоп» (плавна зупинка), «Світло» і червона кнопка <b>«Екстрений стоп»</b> (зупинка одразу).</li>
+  </ol>
+  <p class="note">Якщо телефон заблокується або ти вийдеш з кімнати, локомотив сам плавно зупиниться за 3 секунди. Це захист: поїзд без машиніста не їздить.</p>
+</section>
+
+<section class="card">
+  <h2>Калькулятор: як швидко їде справжній поїзд</h2>
+  <p>Наша модель у <b>87 разів</b> менша за справжній локомотив (масштаб HO = 1:87). Якщо модель проїхала 10 см, справжній поїзд проїхав би 87 × 10 = 870 см. Познач на колії відрізок, засічи секундоміром час і впиши числа:</p>
+  <div class="calc">
+    <label for="dist">Відстань, см<input type="number" id="dist" min="1" value="60" inputmode="decimal"></label>
+    <label for="time">Час, секунд<input type="number" id="time" min="0.1" step="0.1" value="6" inputmode="decimal"></label>
+  </div>
+  <div class="result" aria-live="polite">
+    <div><small>Модель їде</small><span class="big" id="model">10,0</span><small>см за секунду</small></div>
+    <div><small>Справжній поїзд їхав би</small><span class="big" id="real">31</span><small>км/год</small></div>
+  </div>
+  <p id="compare" style="font-weight:600"></p>
+  <details><summary>Як рахує калькулятор</summary><p>Швидкість моделі = відстань ÷ час. Потім множимо на 87 (масштаб) і переводимо сантиметри за секунду в кілометри за годину: множимо на 36 і ділимо на 1000. Разом: <code>км/год = см/с × 87 × 36 ÷ 1000 ≈ см/с × 3,13</code>.</p></details>
+</section>
+
+<section class="card">
+  <h2>Випробування</h2>
+  <p>Справжні конструктори не вірять «на слово» — вони вимірюють. Перемалюй таблицю в журнал конструктора і заповнюй.</p>
+
+  <div class="task"><input type="checkbox" id="t1" aria-labelledby="t1h"><div>
+    <h3 id="t1h">Випробування 1. Як довго їде на одному заряді <span class="badge">легко</span></h3>
+    <p>Дорослий повністю заряджає акумулятор. Запусти локомотив по колу на середній швидкості й записуй час. Коли акумулятор сяде, фари почнуть блимати, а поїзд зупиниться: запиши, скільки хвилин він проїхав.</p>
+  </div></div>
+
+  <div class="task"><input type="checkbox" id="t2" aria-labelledby="t2h"><div>
+    <h3 id="t2h">Випробування 2. Швидкості в масштабі <span class="badge">легко</span></h3>
+    <p>Виміряй швидкість при повзунку на 25, 50, 75 і 100 % і порахуй калькулятором. Яке положення повзунка відповідає маневровій швидкості (до 25 км/год), а яке — пасажирському поїзду (до 160 км/год)?</p>
+  </div></div>
+
+  <div class="task"><input type="checkbox" id="t3" aria-labelledby="t3h"><div>
+    <h3 id="t3h">Випробування 3. Точна зупинка <span class="badge mid">середньо</span></h3>
+    <p>Поклади на колію мітку «станція». Розженися і натисни «Стоп» так, щоб зупинитися якомога ближче до мітки. Виміряй, на скільки сантиметрів промахнувся. Потім у налаштуваннях пульта зміни гальмування і спробуй знову. З якими налаштуваннями найлегше зупинитися точно?</p>
+  </div></div>
+
+  <div class="task"><input type="checkbox" id="t4" aria-labelledby="t4h"><div>
+    <h3 id="t4h">Випробування 4. Дальність зв'язку <span class="badge mid">середньо</span></h3>
+    <p>Відходь з телефоном усе далі від локомотива (по квартирі, в іншу кімнату) і перевіряй, чи слухається він. На якій відстані зв'язок пропадає? Чи заважають стіни?</p>
+  </div></div>
+
+  <div class="table-wrap"><table class="log">
+    <thead><tr><th>Дата</th><th>Випробування</th><th>Налаштування</th><th>Результат</th><th>Висновок</th></tr></thead>
+    <tbody>
+      <tr><td>приклад</td><td>2. Швидкість</td><td>повзунок 50 %</td><td>60 см за 6 с</td><td>≈ 31 км/год, маневровий</td></tr>
+      <tr><td></td><td></td><td></td><td></td><td></td></tr>
+      <tr><td></td><td></td><td></td><td></td><td></td></tr>
+    </tbody>
+  </table></div>
+</section>
+
+<section class="card">
+  <h2>Перевір себе</h2>
+  <details><summary>Чому рейки в нашій залізниці без струму?</summary><p>Бо кожен локомотив має власний акумулятор. Не треба чистити рейки, не буває «мертвих» місць на стрілках, і кожним поїздом можна керувати окремо.</p></details>
+  <details><summary>Навіщо перетворювач напруги?</summary><p>Акумулятор дає 3,7 вольта, а моторові моделі потрібно близько 9–12 вольт. Перетворювач піднімає напругу.</p></details>
+  <details><summary>Що станеться, коли акумулятор майже сяде?</summary><p>Програма помітить це, обмежить швидкість, потім зупинить поїзд і блиматиме фарами. Так акумулятор не розрядиться занадто сильно й не зіпсується.</p></details>
+</section>
+
+<section class="card">
+  <h2>Для дорослого</h2>
+  <ul>
+    <li>Збирання, пайку й зарядку LiPo виконує дорослий. Схема й порядок збирання будуть в окремій інструкції, коли виберемо шасі й компоненти.</li>
+    <li>Пульт у цьому уроці — прошивка локомотива, яка вже написана: веб-пульт, плавний розгін, контроль акумулятора, зупинка при втраті зв'язку, налаштування розгону й гальмування.</li>
+    <li>Таблицю випробувань варто зберігати: це реальні дані для вибору акумулятора й налаштувань наступних локомотивів.</li>
+  </ul>
+</section>
+
+<nav class="lnav"><a href="urok-4.html">← Урок 4. ESP32 і телефон</a><a href="./">Усі уроки →</a></nav>
+</main>
+<script>
+(function(){
+  const d=document.getElementById('dist'),t=document.getElementById('time');
+  const m=document.getElementById('model'),r=document.getElementById('real'),c=document.getElementById('compare');
+  function upd(){
+    const dist=parseFloat(d.value),time=parseFloat(t.value);
+    if(!(dist>0&&time>0)){m.textContent='—';r.textContent='—';c.textContent='Впиши відстань і час більші за нуль.';return;}
+    const cms=dist/time,kmh=cms*87*36/1000;
+    m.textContent=cms.toFixed(1).replace('.',',');r.textContent=Math.round(kmh);
+    let s;
+    if(kmh<=25)s='Маневрова швидкість: так локомотив повільно переставляє вагони на станції.';
+    else if(kmh<=60)s='Як товарний поїзд біля станції або на стрілках.';
+    else if(kmh<=100)s='Швидкість товарного поїзда на перегоні.';
+    else if(kmh<=160)s='Як швидкий пасажирський поїзд, наприклад Інтерсіті.';
+    else s='Швидше, ніж їздять поїзди в Україні. Для моделі це занадто: на поворотах може зійти з рейок!';
+    c.textContent=s;
+  }
+  d.addEventListener('input',upd);t.addEventListener('input',upd);upd();
+})();
+</script>
+<script src="../assets/lesson.js"></script>
+</body>
+</html>
