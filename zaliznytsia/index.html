@@ -1,0 +1,78 @@
+<!doctype html>
+<html lang="uk">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Мозок локомотива</title>
+<meta name="description" content="Уроки для дітей: програмуємо модель залізниці HO на Arduino та ESP32.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Rubik:wght@500;700&family=Golos+Text:wght@400;600&display=swap">
+<style>
+:root{
+  --bg:#eef2f5; --paper:#ffffff; --ink:#1b2430; --mut:#5a6878; --line:#c9d3dc;
+  --signal:#e0a100; --go:#1f8f50;
+  --display:"Rubik",system-ui,sans-serif; --body:"Golos Text",system-ui,sans-serif;
+}
+@media (prefers-color-scheme: dark){:root{
+  --bg:#121820; --paper:#1a222c; --ink:#e7edf3; --mut:#9aa8b6; --line:#2e3a47;
+  --signal:#f2bb2c; --go:#3cbf75; color-scheme:dark}}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:17px/1.6 var(--body);
+  padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:32px 48px}
+main{max-width:720px;margin:0 auto;display:grid;gap:24px}
+h1,h2{font-family:var(--display);line-height:1.2;margin:0;text-wrap:balance}
+h1{font-size:2.1rem}h2{font-size:1.15rem}
+p{margin:0}
+.eyebrow{font:600 .8rem var(--body);letter-spacing:.08em;text-transform:uppercase;color:var(--mut)}
+header{display:grid;gap:8px}
+/* лінія колії з уроками-станціями */
+.line{list-style:none;margin:0;padding:0;display:grid;gap:0;position:relative}
+.line::before{content:"";position:absolute;left:15px;top:20px;bottom:20px;width:6px;
+  background:repeating-linear-gradient(var(--line) 0 4px,transparent 4px 10px);border-left:2px solid var(--line);border-right:2px solid var(--line)}
+.stop{display:grid;grid-template-columns:36px 1fr;gap:14px;align-items:center;padding-block:8px;position:relative}
+.dot{width:36px;height:36px;border-radius:50%;background:var(--paper);border:3px solid var(--line);display:grid;place-items:center;font:700 .95rem var(--display);color:var(--mut);z-index:1}
+.stop.ready .dot{border-color:var(--go);color:var(--go)}
+.card{background:var(--paper);border:1px solid var(--line);border-radius:14px;padding:14px 16px;display:grid;gap:4px;min-width:0;color:inherit;text-decoration:none}
+a.card:hover,a.card:focus-visible{border-color:var(--go);outline:none}
+.stop:not(.ready) .card{background:transparent;border-style:dashed}
+.stop:not(.ready) h2{color:var(--mut)}
+.tag{font:600 .75rem var(--body);color:var(--go)}
+.stop:not(.ready) .tag{color:var(--mut)}
+.desc{color:var(--mut);font-size:.95rem}
+footer{color:var(--mut);font-size:.9rem}
+</style>
+</head>
+<body>
+<main>
+<header>
+  <a href="../" style="font-weight:600;color:var(--go)">← Майстерня</a>
+  <div class="eyebrow">Курс · Модель залізниці HO · масштаб 1:87</div>
+  <h1>Мозок локомотива</h1>
+  <p>Будуємо свою залізницю, де кожен локомотив має власний маленький комп'ютер і слухається телефона. Тут уроки по черзі: від першої фари до поїзда, що їде сам.</p>
+</header>
+
+<ol class="line">
+  <li class="stop ready"><span class="dot">1</span>
+    <a class="card" href="urok-1.html">
+      <span class="tag">Готово · 30–45 хв</span>
+      <h2>Запалюємо фару локомотива</h2>
+      <span class="desc">Arduino, світлодіод і резистор у симуляторі Wokwi. Перша програма.</span>
+    </a></li>
+  <li class="stop"><span class="dot">2</span>
+    <div class="card"><span class="tag">Незабаром</span><h2>Кнопка машиніста</h2>
+      <span class="desc">Кнопка вмикає й вимикає фару. Що таке «вхід» контролера.</span></div></li>
+  <li class="stop"><span class="dot">3</span>
+    <div class="card"><span class="tag">Незабаром</span><h2>Мотор і швидкість</h2>
+      <span class="desc">Як ШІМ робить мотор повільним або швидким. Ручка швидкості.</span></div></li>
+  <li class="stop"><span class="dot">4</span>
+    <div class="card"><span class="tag">Незабаром</span><h2>ESP32 і телефон</h2>
+      <span class="desc">Керуємо фарою з телефона через Wi-Fi.</span></div></li>
+  <li class="stop"><span class="dot">5</span>
+    <div class="card"><span class="tag">Незабаром</span><h2>Локомотив без дротів</h2>
+      <span class="desc">Ставимо «мозок» і акумулятор у справжній локомотив.</span></div></li>
+</ol>
+
+<footer>Сімейний навчальний проєкт. Залізниця dead rail: рейки без струму, кожен локомотив живиться від власного акумулятора.</footer>
+</main>
+</body>
+</html>
