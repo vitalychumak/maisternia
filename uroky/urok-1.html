@@ -1,0 +1,261 @@
+<!doctype html>
+<html lang="uk">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Урок 1. Фара локомотива</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Rubik:wght@500;700&family=Golos+Text:wght@400;600&family=JetBrains+Mono:wght@400;600&display=swap">
+<style>
+/* Layout: одна колонка-«робочий зошит», кроки йдуть як станції на лінії */
+:root{
+  --bg:#eef2f5; --paper:#ffffff; --ink:#1b2430; --mut:#5a6878; --line:#c9d3dc;
+  --signal:#e0a100; --go:#1f8f50; --stop:#cf3d3d; --code-bg:#1d2733; --code-fg:#e6edf3;
+  --display:"Rubik",system-ui,sans-serif; --body:"Golos Text",system-ui,sans-serif; --mono:"JetBrains Mono",ui-monospace,monospace;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --bg:#121820; --paper:#1a222c; --ink:#e7edf3; --mut:#9aa8b6; --line:#2e3a47;
+  --signal:#f2bb2c; --go:#3cbf75; --stop:#ef6262; --code-bg:#0c1117; --code-fg:#e6edf3; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#121820; --paper:#1a222c; --ink:#e7edf3; --mut:#9aa8b6; --line:#2e3a47;
+  --signal:#f2bb2c; --go:#3cbf75; --stop:#ef6262; --code-bg:#0c1117; --code-fg:#e6edf3; color-scheme:dark}
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--ink);font:17px/1.6 var(--body);
+  padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:24px 48px}
+main{max-width:720px;margin:0 auto;display:grid;gap:20px}
+h1,h2,h3{font-family:var(--display);text-wrap:balance;line-height:1.2;margin:0}
+h1{font-size:2rem}h2{font-size:1.35rem}h3{font-size:1.05rem}
+p{margin:0}
+.eyebrow{font:600 .8rem var(--body);letter-spacing:.08em;text-transform:uppercase;color:var(--mut)}
+header{display:grid;gap:8px}
+.card{background:var(--paper);border:1px solid var(--line);border-radius:14px;padding:20px;display:grid;gap:12px;min-width:0}
+.steps{display:grid;gap:20px;position:relative}
+.step{display:grid;grid-template-columns:40px 1fr;gap:14px;align-items:start}
+.step .num{width:40px;height:40px;border-radius:50%;background:var(--ink);color:var(--bg);display:grid;place-items:center;font:700 1.1rem var(--display)}
+.step .card{min-width:0}
+code{font-family:var(--mono);font-size:.9em;background:color-mix(in srgb,var(--signal) 18%,transparent);padding:1px 5px;border-radius:5px}
+pre{margin:0;background:var(--code-bg);color:var(--code-fg);border-radius:10px;padding:14px 16px;overflow-x:auto;font:14px/1.55 var(--mono)}
+pre code{background:none;padding:0;font-size:inherit}
+.cm{color:#8fa3b8}
+.codebox{display:grid;gap:8px}
+.copy{justify-self:start;font:600 .9rem var(--body);border:1px solid var(--line);background:var(--paper);color:var(--ink);border-radius:8px;padding:6px 12px;cursor:pointer}
+.copy:focus-visible,button:focus-visible,input:focus-visible{outline:3px solid var(--signal);outline-offset:2px}
+ul,ol{margin:0;padding-left:1.3em;display:grid;gap:6px}
+.table-wrap{overflow-x:auto}
+table{border-collapse:collapse;width:100%;font-size:.95rem}
+th,td{text-align:left;padding:8px 10px;border-bottom:1px solid var(--line);vertical-align:top}
+th{font-family:var(--display);font-weight:500;color:var(--mut)}
+.note{border-left:4px solid var(--signal);padding:10px 14px;background:color-mix(in srgb,var(--signal) 10%,var(--paper));border-radius:0 10px 10px 0}
+.warn{border-left-color:var(--stop);background:color-mix(in srgb,var(--stop) 9%,var(--paper))}
+.demo{display:grid;grid-template-columns:auto 1fr;gap:20px;align-items:center}
+.lamp{width:72px;height:72px;border-radius:50%;border:4px solid var(--line);background:#3a4450;transition:background .05s,box-shadow .05s}
+.lamp.on{background:#fff7d6;box-shadow:0 0 28px 8px color-mix(in srgb,var(--signal) 70%,transparent)}
+.demo label{font-weight:600}
+.demo input[type=range]{width:100%;accent-color:var(--signal)}
+.demo output{font-family:var(--mono)}
+.task{display:grid;grid-template-columns:auto 1fr;gap:12px;align-items:start}
+.task input{width:22px;height:22px;margin-top:3px;accent-color:var(--go)}
+.task.done h3{text-decoration:line-through;color:var(--mut)}
+.badge{display:inline-block;font:600 .75rem var(--body);padding:2px 8px;border-radius:99px;background:color-mix(in srgb,var(--go) 18%,transparent);color:var(--go);margin-left:6px;vertical-align:middle}
+.badge.hard{background:color-mix(in srgb,var(--stop) 16%,transparent);color:var(--stop)}
+details summary{cursor:pointer;font-weight:600}
+details[open] summary{margin-bottom:10px}
+a{color:var(--go)}
+@media (max-width:480px){.step{grid-template-columns:1fr}.step .num{width:34px;height:34px}.demo{grid-template-columns:1fr;justify-items:start}}
+@media (prefers-reduced-motion:reduce){.lamp{transition:none}}
+body{margin:0}img{max-width:100%}
+</style>
+</head>
+<body>
+
+
+<main>
+<header>
+  <a href="../" style="font-weight:600">← Усі уроки</a>
+  <div class="eyebrow">Залізниця HO · Урок 1 із серії «Мозок локомотива»</div>
+  <h1>Запалюємо фару локомотива</h1>
+  <p>Сьогодні ти станеш головним конструктором: збереш схему фари й напишеш програму, яка її вмикає та вимикає. Усе робимо в симуляторі: нічого не згорить, навіть якщо помилишся. Займе 30–45 хвилин.</p>
+</header>
+
+<section class="card">
+  <h2>Що таке «мозок» локомотива</h2>
+  <p>У справжньому локомотиві машиніст натискає кнопки, і загоряються фари, крутяться колеса. У нашій моделі машиніста замінить маленький комп'ютер, <b>контролер</b>. Сьогодні це <b>Arduino Uno</b>: на ньому найпростіше вчитися. Потім у локомотив поставимо його молодшого брата ESP32, він уміє розмовляти з телефоном через Wi-Fi.</p>
+  <ul>
+    <li><b>Контролер</b> — мозок. Виконує програму крок за кроком.</li>
+    <li><b>Світлодіод</b> — фара. Світить, тільки якщо струм іде в правильний бік.</li>
+    <li><b>Резистор</b> — «кран» для струму. Без нього світлодіод згорить.</li>
+  </ul>
+</section>
+
+<section class="card">
+  <h2>Подивись, як блимає фара</h2>
+  <div class="demo">
+    <div class="lamp" id="lamp" role="img" aria-label="Фара"></div>
+    <div style="display:grid;gap:6px;min-width:0">
+      <label for="ms">Скільки чекати між спалахами: <output id="msOut">1000</output> мс</label>
+      <input type="range" id="ms" min="50" max="2000" step="50" value="1000">
+      <p style="color:var(--mut);font-size:.95rem">1000 мілісекунд = 1 секунда. Це число ти сам впишеш у програму.</p>
+    </div>
+  </div>
+</section>
+
+<div class="steps">
+  <div class="step"><div class="num">1</div><div class="card">
+    <h3>Відкрий симулятор</h3>
+    <p>Зайди на <a href="https://wokwi.com/projects/new/arduino-uno" target="_blank" rel="noopener">wokwi.com/projects/new/arduino-uno</a>. Ліворуч вікно для програми, праворуч плата Arduino. Реєструватися не обов'язково, але з акаунтом проєкт можна зберегти.</p>
+  </div></div>
+
+  <div class="step"><div class="num">2</div><div class="card">
+    <h3>Постав фару й резистор</h3>
+    <ol>
+      <li>Натисни синю кнопку <b>«+»</b> над платою і знайди <b>LED</b> (світлодіод).</li>
+      <li>Ще раз <b>«+»</b> і знайди <b>Resistor</b> (резистор).</li>
+      <li>Натисни на резистор і постав значення <code>220</code> Ω.</li>
+    </ol>
+  </div></div>
+
+  <div class="step"><div class="num">3</div><div class="card">
+    <h3>З'єднай дроти</h3>
+    <p>Дріт тягнеться так: натисни на ніжку деталі, потім на потрібне гніздо плати.</p>
+    <ol>
+      <li>Гніздо <code>13</code> на платі → одна ніжка резистора.</li>
+      <li>Друга ніжка резистора → <b>довга</b> ніжка світлодіода (вона називається <b>A</b>, анод, це «плюс»).</li>
+      <li><b>Коротка</b> ніжка світлодіода (<b>C</b>, катод, «мінус») → гніздо <code>GND</code> на платі. GND — це «земля», спільний мінус.</li>
+    </ol>
+    <p class="note">Наведи мишку на ніжку світлодіода, і Wokwi підкаже, де A, а де C.</p>
+  </div></div>
+
+  <div class="step"><div class="num">4</div><div class="card">
+    <h3>Напиши програму</h3>
+    <p>Зітри все у вікні програми й впиши це. Можна скопіювати, але краще набери сам: так швидше запам'ятаєш.</p>
+    <div class="codebox">
+<pre><code id="code1"><span class="cm">// Урок 1: фара, що блимає</span>
+const int FARA = 13;        <span class="cm">// фара під'єднана до гнізда 13</span>
+
+void setup() {              <span class="cm">// виконується один раз після ввімкнення</span>
+  pinMode(FARA, OUTPUT);    <span class="cm">// гніздо 13 буде «виходом»</span>
+}
+
+void loop() {               <span class="cm">// повторюється завжди</span>
+  digitalWrite(FARA, HIGH); <span class="cm">// увімкнути фару</span>
+  delay(1000);              <span class="cm">// чекати 1000 мс = 1 секунда</span>
+  digitalWrite(FARA, LOW);  <span class="cm">// вимкнути фару</span>
+  delay(1000);              <span class="cm">// чекати 1 секунду</span>
+}</code></pre>
+      <button class="copy" data-target="code1" type="button">Скопіювати код</button>
+    </div>
+  </div></div>
+
+  <div class="step"><div class="num">5</div><div class="card">
+    <h3>Запусти</h3>
+    <p>Натисни зелену кнопку <b>▶</b> над платою. Фара має блимати раз на секунду. Вийшло? Ти щойно запрограмував контролер!</p>
+    <p class="note warn"><b>Не світиться?</b> Перевір: довга ніжка світлодіода дивиться в бік резистора й гнізда 13? Дріт від короткої ніжки йде в GND? Якщо переплутати ніжки, світлодіод не горить: струм через нього йде тільки в один бік.</p>
+  </div></div>
+</div>
+
+<section class="card">
+  <h2>Це як у Scratch</h2>
+  <p>Ти вже вмієш програмувати в Scratch. Тут ті самі ідеї, тільки записані словами.</p>
+  <div class="table-wrap"><table>
+    <thead><tr><th>Блок у Scratch</th><th>В Arduino</th></tr></thead>
+    <tbody>
+      <tr><td>«Коли натиснуто прапорець»</td><td><code>void setup() { … }</code></td></tr>
+      <tr><td>«Завжди»</td><td><code>void loop() { … }</code></td></tr>
+      <tr><td>«Чекати 1 секунду»</td><td><code>delay(1000);</code></td></tr>
+      <tr><td>«Показати» / «Сховати»</td><td><code>digitalWrite(FARA, HIGH);</code> / <code>LOW</code></td></tr>
+      <tr><td>Змінна</td><td><code>const int FARA = 13;</code></td></tr>
+    </tbody>
+  </table></div>
+  <p style="color:var(--mut)">Різниця: у кінці кожної команди ставиться крапка з комою <code>;</code>. Забув її — програма не запуститься, а Wokwi покаже рядок із помилкою.</p>
+</section>
+
+<section class="card">
+  <h2>Завдання конструктора</h2>
+  <p style="color:var(--mut)">Познач галочкою те, що вийшло. Галочки запам'ятовуються на цьому пристрої.</p>
+
+  <div class="task"><input type="checkbox" id="t1" aria-labelledby="t1h"><div>
+    <h3 id="t1h">Швидка блималка <span class="badge">легко</span></h3>
+    <p>Зроби так, щоб фара блимала вчетверо швидше. Яке число треба поставити в <code>delay</code>?</p>
+  </div></div>
+
+  <div class="task"><input type="checkbox" id="t2" aria-labelledby="t2h"><div>
+    <h3 id="t2h">Сигнал «увага» <span class="badge">легко</span></h3>
+    <p>Два короткі спалахи, потім довга пауза. Так локомотив вітається перед відправленням.</p>
+  </div></div>
+
+  <div class="task"><input type="checkbox" id="t3" aria-labelledby="t3h"><div>
+    <h3 id="t3h">Блималка переїзду <span class="badge">середньо</span></h3>
+    <p>Додай другий, <b>червоний</b> світлодіод із резистором на гніздо <code>12</code>. Нехай два світлодіоди блимають по черзі, як на залізничному переїзді. Підказка: створи другу змінну <code>const int CHERVONYI = 12;</code> і не забудь <code>pinMode</code> для неї.</p>
+  </div></div>
+
+  <div class="task"><input type="checkbox" id="t4" aria-labelledby="t4h"><div>
+    <h3 id="t4h">Передні й задні фари <span class="badge hard">складно</span></h3>
+    <p>Біла фара спереду, червоний ліхтар ззаду. Нехай поїзд «їде вперед» 5 секунд (горить біла), потім «назад» 5 секунд (горить червона). Саме так працюватиме світло в нашому справжньому локомотиві!</p>
+  </div></div>
+</section>
+
+<section class="card">
+  <h2>Перевір себе</h2>
+  <details><summary>Навіщо потрібен резистор?</summary><p>Він обмежує струм. Без резистора через світлодіод піде надто великий струм, і світлодіод згорить, а іноді й гніздо контролера.</p></details>
+  <details><summary>Що буде, якщо перевернути світлодіод?</summary><p>Він просто не горітиме: світлодіод пропускає струм тільки в один бік, від довгої ніжки до короткої. Нічого не зламається.</p></details>
+  <details><summary>Що робить <code>loop()</code>, коли доходить до кінця?</summary><p>Починає спочатку. І так нескінченно, поки є живлення. Як блок «завжди».</p></details>
+</section>
+
+<section class="card">
+  <h2>Для дорослого</h2>
+  <ul>
+    <li>Цей урок готує до світла в майбутньому локомотиві: там фари теж вмикаються командами <code>HIGH</code> і <code>LOW</code>, тільки за командою з телефона.</li>
+    <li>Якщо зі схемою зовсім не виходить, відкрийте у Wokwi вкладку <code>diagram.json</code> і замініть її вміст на текст нижче. Схема збереться сама. Але спершу дайте дитині спробувати з'єднати дроти самостійно.</li>
+  </ul>
+  <details><summary>Готова схема (diagram.json)</summary>
+    <div class="codebox">
+<pre><code id="code2">{
+  "version": 1,
+  "author": "railway-ho",
+  "editor": "wokwi",
+  "parts": [
+    { "type": "wokwi-arduino-uno", "id": "uno", "top": 0, "left": 0, "attrs": {} },
+    { "type": "wokwi-led", "id": "led1", "top": -130, "left": 140, "attrs": { "color": "white" } },
+    { "type": "wokwi-resistor", "id": "r1", "top": -60, "left": 190, "rotate": 90, "attrs": { "value": "220" } }
+  ],
+  "connections": [
+    [ "uno:13", "r1:2", "green", [] ],
+    [ "r1:1", "led1:A", "green", [] ],
+    [ "led1:C", "uno:GND.1", "black", [] ]
+  ],
+  "dependencies": {}
+}</code></pre>
+      <button class="copy" data-target="code2" type="button">Скопіювати схему</button>
+    </div>
+  </details>
+  <p>Наступний урок: кнопка вмикає фару, а потім мотор, швидкість якого змінюється ручкою.</p>
+</section>
+</main>
+
+<script>
+(function(){
+  const lamp=document.getElementById('lamp'),ms=document.getElementById('ms'),out=document.getElementById('msOut');
+  let on=false,t=null;
+  function tick(){on=!on;lamp.classList.toggle('on',on);t=setTimeout(tick,+ms.value);}
+  ms.addEventListener('input',()=>{out.textContent=ms.value;clearTimeout(t);t=setTimeout(tick,+ms.value);});
+  tick();
+
+  document.querySelectorAll('.copy').forEach(b=>b.addEventListener('click',()=>{
+    const el=document.getElementById(b.dataset.target),txt=el.innerText,old=b.textContent;
+    const done=()=>{b.textContent='Скопійовано';setTimeout(()=>b.textContent=old,1500);};
+    if(navigator.clipboard&&navigator.clipboard.writeText){
+      navigator.clipboard.writeText(txt).then(done).catch(()=>sel(el));
+    } else sel(el);
+  }));
+  function sel(el){const r=document.createRange();r.selectNodeContents(el);const s=getSelection();s.removeAllRanges();s.addRange(r);}
+
+  document.querySelectorAll('.task input').forEach(cb=>{
+    const key='lesson1-'+cb.id,task=cb.closest('.task');
+    try{cb.checked=localStorage.getItem(key)==='1';}catch(e){}
+    task.classList.toggle('done',cb.checked);
+    cb.addEventListener('change',()=>{task.classList.toggle('done',cb.checked);try{localStorage.setItem(key,cb.checked?'1':'0');}catch(e){}});
+  });
+})();
+</script>
+</body>
+</html>
