@@ -56,6 +56,9 @@ button:focus-visible,input:focus-visible,textarea:focus-visible{outline:3px soli
 .field{display:grid;gap:6px;font-weight:600}
 .field input,.field textarea{font:1rem var(--body);padding:10px 12px;border:1px solid var(--line);border-radius:10px;background:var(--bg);color:var(--ink);width:100%}
 .field textarea{min-height:90px;resize:vertical}
+.cmt{display:grid;gap:4px;font-size:.9rem;font-weight:600;color:var(--mut)}
+.cmt textarea{font:.95rem var(--body);padding:8px 10px;border:1px dashed var(--line);border-radius:10px;background:var(--bg);color:var(--ink);width:100%;min-height:44px;resize:vertical}
+.cmt textarea:not(:placeholder-shown){border-style:solid}
 ol.top{margin:0;padding-left:1.4em;display:grid;gap:8px}
 ol.top li{display:flex;gap:8px;align-items:center;justify-content:space-between}
 ol.top li span{min-width:0}
@@ -99,6 +102,7 @@ pre.out{margin:0;white-space:pre-wrap;background:var(--bg);border:1px solid var(
     <label><input type="radio" name="fw" value="Готова програма WLED"> <span><b>Готова програма WLED.</b> Світло на стіні вже за один вечір, але програмувати майже нічого не будеш.</span></label>
     <label><input type="radio" name="fw" value="Тільки своя програма"> <span><b>Тільки своя програма.</b> Усе напишемо самі, але перший результат буде через кілька тижнів.</span></label>
     <label><input type="radio" name="fw" value="Разом: спочатку WLED, потім своя"> <span><b>Разом.</b> Спочатку WLED, щоб швидко засвітилось, а потім своя програма з твоїми ідеями: оплески, гра, світло при відключеннях.</span></label>
+    <label class="cmt">Коментар<textarea data-c="q-fw" rows="2" placeholder="Що думаєш про це? Можна не писати"></textarea></label>
   </div>
 
   <div class="choice" role="radiogroup" aria-labelledby="q2">
@@ -106,6 +110,7 @@ pre.out{margin:0;white-space:pre-wrap;background:var(--bg);border:1px solid var(
     <label><input type="radio" name="first" value="Фігура з пікселів на магнітах"> <span><b>Фігура</b> з пікселів на магнітах, яку можна переставляти.</span></label>
     <label><input type="radio" name="first" value="Картина-квадрат, яку малюєш з телефона"> <span><b>Картина-квадрат</b>, яку малюєш з телефона.</span></label>
     <label><input type="radio" name="first" value="Смуга по периметру кімнати"> <span><b>Смуга</b> по периметру кімнати.</span></label>
+    <label class="cmt">Коментар<textarea data-c="q-first" rows="2" placeholder="Наприклад: яка фігура, якого розміру, де на стіні"></textarea></label>
   </div>
 
   <label class="field" for="name">Як назвемо проєкт?
@@ -144,7 +149,7 @@ const GROUPS=[
  ]},
  {t:'Де світить',d:'Обери, якою буде світлова стіна.',items:[
   {id:'figure',t:'Фігура з пікселів, яку можна переставляти',what:'Складаєш із світлових «крапок» зірку, серце, кота, а потім переставляєш в іншу фігуру.',how:'Пікселі на дроті (як гірлянда), кожен у маленькому тримачі з магнітом. Тримачі надрукуємо на 3D-принтері, а тримаються вони на магнітній дошці. Після перестановки показуєш на телефоні, де тепер кожен піксель.',vars:['Простіше: відрізки стрічки, спаяні в одну незмінну фігуру (★★)','Найскладніше: плитки, що з\'єднуються магнітами без дротів (★★★★★, потім)'],s:2,p:'₴₴',w:'part'},
-  {id:'matrix',t:'Картина-квадрат, яку малюєш з телефона',what:'На стіні квадрат із маленьких світлових квадратиків. На телефоні такий самий: розфарбовуєш клітинки, і вони загоряються на стіні.',how:'Світлодіодна матриця: 16 рядів по 16 світлодіодів (256 пікселів). Готова панель має розмір приблизно 16 × 16 см, а саморобна зі стрічки може бути більшою, наприклад 30 × 30 см. На телефоні сторінка-сітка для малювання. На матриці можна показувати ще й цифри та стрілки для ігор.',s:3,p:'₴₴',w:'part'},
+  {id:'matrix',t:'Картина-квадрат, яку малюєш з телефона',what:'На стіні квадрат із маленьких світлових квадратиків. На телефоні такий самий: розфарбовуєш клітинки, і вони загоряються на стіні.',how:'Світлодіодна матриця: 16 рядів по 16 світлодіодів (256 пікселів). Розмір залежить від відстані між світлодіодами, а не від їх кількості: готова панель — приблизно 16 × 16 см, зі стрічки — приблизно 50 × 50 см, з пікселів-гірлянди з кроком 5 см — приблизно 80 × 80 см. Світлодіодів скрізь ті самі 256, тож ціна й живлення майже не змінюються. На телефоні сторінка-сітка для малювання. На матриці можна показувати ще й цифри та стрілки для ігор.',s:3,p:'₴₴',w:'part'},
   {id:'perimeter',t:'Смуга по периметру кімнати',what:'Світиться вся кімната: смуга вгорі під стелею або внизу біля підлоги.',how:'12–20 метрів стрічки в алюмінієвому профілі з матовою кришкою. Електроніка проста, а от грошей і роботи з монтажем багато.',s:2,p:'₴₴₴',w:'yes'}
  ]},
  {t:'Як керувати',d:'Можна обрати кілька способів.',items:[
@@ -167,8 +172,11 @@ const GROUPS=[
 ];
 const ALL=GROUPS.flatMap(g=>g.items);
 const KEY='karta-idei-v1';
-let st={r:{},order:[],fw:'',first:'',name:'',newideas:''};
+let st={r:{},order:[],fw:'',first:'',name:'',newideas:'',c:{}};
 try{const s=JSON.parse(localStorage.getItem(KEY)||'null');if(s)st=Object.assign(st,s);}catch(e){}
+if(!st.c)st.c={};
+function cmtBox(id){return '<label class="cmt">Коментар<textarea data-c="'+id+'" rows="2" placeholder="Твоя думка, питання чи уточнення. Можна не писати"></textarea></label>';}
+function bindCmt(scope){scope.querySelectorAll('textarea[data-c]').forEach(t=>{t.value=st.c[t.dataset.c]||'';t.oninput=()=>{const v=t.value.trim();if(v)st.c[t.dataset.c]=t.value;else delete st.c[t.dataset.c];save();renderOut();};});}
 function save(){try{localStorage.setItem(KEY,JSON.stringify(st));}catch(e){}}
 const W={yes:'Є у WLED',part:'Частково є у WLED'};
 const LBL={want:'Дуже хочу',later:'Можна потім',no:'Не треба'};
@@ -188,7 +196,9 @@ function render(){
       if(!it.base){
         h+='<div class="rate" role="group" aria-label="Як тобі ця ідея?">'+['want','later','no'].map(v=>'<button type="button" data-v="'+v+'" aria-pressed="'+(st.r[it.id]===v)+'">'+LBL[v]+'</button>').join('')+'</div>';
       }else h+='<div class="meta"><span class="tag">Основа</span></div>';
+      h+=cmtBox(it.id);
       el.innerHTML=h;
+      bindCmt(el);
       el.querySelectorAll('.rate button').forEach(b=>b.addEventListener('click',()=>{
         const v=b.dataset.v;
         if(st.r[it.id]===v){delete st.r[it.id];}else st.r[it.id]=v;
@@ -222,10 +232,11 @@ function list(v){return ALL.filter(i=>st.r[i.id]===v).map(i=>'- '+i.t).join('\n'
 function renderOut(){
   const t=['КАРТА ІДЕЙ — результат',
    'Назва проєкту: '+(st.name||'(ще не придумали)'),
-   'Як програмуємо: '+(st.fw||'(не обрано)'),
-   'Перше на стіні: '+(st.first||'(не обрано)'),
+   'Як програмуємо: '+(st.fw||'(не обрано)')+(st.c['q-fw']?'\n  коментар: '+st.c['q-fw'].trim():''),
+   'Перше на стіні: '+(st.first||'(не обрано)')+(st.c['q-first']?'\n  коментар: '+st.c['q-first'].trim():''),
    '','Дуже хочу (по порядку):',st.order.length?st.order.map((id,i)=>(i+1)+'. '+title(id)).join('\n'):'- (нічого)',
    '','Можна потім:',list('later'),'','Не треба:',list('no'),
+   '','Коментарі до ідей:',ALL.filter(i=>st.c[i.id]).map(i=>'- '+i.t+': '+st.c[i.id].trim()).join('\n')||'- (немає)',
    '','Нові ідеї:',st.newideas||'- (немає)'].join('\n');
   document.getElementById('out').textContent=t;return t;
 }
@@ -234,6 +245,7 @@ function bindForm(){
   document.querySelectorAll('input[name=first]').forEach(r=>{r.checked=r.value===st.first;r.addEventListener('change',()=>{st.first=r.value;save();renderOut();});});
   const n=document.getElementById('name'),ni=document.getElementById('newideas');
   n.value=st.name;ni.value=st.newideas;
+  bindCmt(document.querySelector('.card'));
   n.addEventListener('input',()=>{st.name=n.value;save();renderOut();});
   ni.addEventListener('input',()=>{st.newideas=ni.value;save();renderOut();});
 }
@@ -244,7 +256,7 @@ document.getElementById('copy').addEventListener('click',e=>{
 });
 document.getElementById('reset').addEventListener('click',()=>{document.getElementById('resetAsk').hidden=false;});
 document.getElementById('resetYes').addEventListener('click',()=>{
-  st={r:{},order:[],fw:'',first:'',name:'',newideas:''};save();
+  st={r:{},order:[],fw:'',first:'',name:'',newideas:'',c:{}};save();
   document.getElementById('resetAsk').hidden=true;render();renderTop();bindForm();renderOut();
 });
 
