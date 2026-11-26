@@ -68,6 +68,10 @@ ol.top li span{min-width:0}
 .small{color:var(--mut);font-size:.92rem}
 .btn{font:600 1rem var(--body);border:0;border-radius:12px;padding:14px 18px;background:var(--accent);color:#fff;cursor:pointer;justify-self:start}
 .btn.ghost{background:transparent;color:var(--mut);border:1px solid var(--line)}
+[hidden]{display:none!important}
+.clr{font:600 .85rem var(--body);border:1px solid var(--line);background:transparent;color:var(--mut);border-radius:8px;padding:5px 12px;cursor:pointer;justify-self:start}
+.clr:hover{color:var(--ink);border-color:var(--mut)}
+.saved{font-size:.9rem;color:var(--mut)}
 pre.out{margin:0;white-space:pre-wrap;background:var(--bg);border:1px solid var(--line);border-radius:10px;padding:12px;font-size:.9rem;max-height:260px;overflow:auto}
 .row{display:flex;flex-wrap:wrap;gap:10px}
 @media (prefers-reduced-motion:reduce){.strip i{transition:none}}
@@ -89,6 +93,7 @@ pre.out{margin:0;white-space:pre-wrap;background:var(--bg);border:1px solid var(
     <span><span class="stars">★★★★★</span> — великий складний проєкт</span>
     <span><b>₴</b> — дешево · <b>₴₴</b> — помірно · <b>₴₴₴</b> — дорого</span>
   </div>
+  <p class="small"><b>Усе, що ти позначаєш і пишеш, зберігається само</b> на цьому пристрої. Можна зупинитися й продовжити пізніше. Передумала — натисни «Очистити» під питанням.</p>
   <p class="small">«Є у WLED» означає, що це вже вміє готова безкоштовна програма для світлодіодних стрічок. Таке можна побачити працюючим дуже швидко, а потім написати своє.</p>
 </section>
 
@@ -108,14 +113,17 @@ pre.out{margin:0;white-space:pre-wrap;background:var(--bg);border:1px solid var(
     <label><input type="radio" name="first" value="Фігура з пікселів на магнітах"> <span><b>Фігура</b> з пікселів на магнітах, яку можна переставляти.</span></label>
     <label><input type="radio" name="first" value="Картина-квадрат, яку малюєш з телефона"> <span><b>Картина-квадрат</b>, яку малюєш з телефона.</span></label>
     <label class="cmt">Коментар<textarea data-c="q-first" rows="2" placeholder="Наприклад: яка фігура, якого розміру, де на стіні"></textarea></label>
+    <button type="button" class="clr" data-clear="first">Очистити</button>
   </div>
 
   <label class="field" for="name">Як назвемо проєкт?
     <input type="text" id="name" placeholder="Наприклад: Чарівне світло, Світлячок, Розумна стіна…">
   </label>
+  <button type="button" class="clr" data-clear="name">Очистити</button>
   <label class="field" for="newideas">Мої нові ідеї
     <textarea id="newideas" placeholder="Якщо щось придумаєш, пиши сюди"></textarea>
   </label>
+  <button type="button" class="clr" data-clear="newideas">Очистити</button>
 </section>
 
 <section class="card">
@@ -125,9 +133,9 @@ pre.out{margin:0;white-space:pre-wrap;background:var(--bg);border:1px solid var(
   <p class="empty" id="topEmpty">Поки що порожньо. Познач ідеї вище кнопкою «Дуже хочу».</p>
 </section>
 
-<section class="card">
-  <h2>Готово? Надішли результат</h2>
-  <p class="small">Кнопка скопіює всі твої відповіді. Потім за цими відповідями складемо план.</p>
+<section class="card" id="result" hidden>
+  <h2>Результат</h2>
+  <p class="small">Цей блок видно тільки за посиланням із <code>#rezultat</code> у кінці адреси. Скопіюй відповіді й надішли їх Claude, щоб скласти план.</p>
   <div class="row">
     <button class="btn" id="copy" type="button">Скопіювати результат</button>
     <button class="btn ghost" id="reset" type="button">Почати спочатку</button>
@@ -215,9 +223,15 @@ function render(){
       else if(!it.base){
         h+='<div class="rate" role="group" aria-label="Як тобі ця ідея?">'+['want','later','no'].map(v=>'<button type="button" data-v="'+v+'" aria-pressed="'+(st.r[it.id]===v)+'">'+LBL[v]+'</button>').join('')+'</div>';
       }else h+='<div class="meta"><span class="tag">Основа</span></div>';
-      h+=cmtBox(it.id);
+      h+=cmtBox(it.id)+'<button type="button" class="clr">Очистити</button>';
       el.innerHTML=h;
       bindCmt(el);
+      el.querySelector('.clr').addEventListener('click',()=>{
+        delete st.r[it.id];delete st.c[it.id];st.order=st.order.filter(x=>x!==it.id);
+        el.dataset.r='';el.querySelectorAll('.rate button').forEach(x=>x.setAttribute('aria-pressed','false'));
+        const ta=el.querySelector('textarea');if(ta)ta.value='';
+        save();renderTop();renderOut();
+      });
       el.querySelectorAll('.rate button').forEach(b=>b.addEventListener('click',()=>{
         const v=b.dataset.v;
         if(st.r[it.id]===v){delete st.r[it.id];}else st.r[it.id]=v;
@@ -267,6 +281,15 @@ function bindForm(){
   n.addEventListener('input',()=>{st.name=n.value;save();renderOut();});
   ni.addEventListener('input',()=>{st.newideas=ni.value;save();renderOut();});
 }
+document.querySelectorAll('[data-clear]').forEach(b=>b.addEventListener('click',()=>{
+  const k=b.dataset.clear;
+  if(k==='first'){st.first='';delete st.c['q-first'];document.querySelectorAll('input[name=first]').forEach(r=>r.checked=false);document.querySelector('textarea[data-c="q-first"]').value='';}
+  if(k==='name'){st.name='';document.getElementById('name').value='';}
+  if(k==='newideas'){st.newideas='';document.getElementById('newideas').value='';}
+  save();renderOut();
+}));
+function showResult(){document.getElementById('result').hidden=location.hash!=='#rezultat';}
+window.addEventListener('hashchange',showResult);showResult();
 document.getElementById('copy').addEventListener('click',e=>{
   const b=e.currentTarget,t=renderOut(),old=b.textContent;
   const sel=()=>{const r=document.createRange();r.selectNodeContents(document.getElementById('out'));const s=getSelection();s.removeAllRanges();s.addRange(r);b.textContent='Виділено — скопіюй вручну';setTimeout(()=>b.textContent=old,2500);};

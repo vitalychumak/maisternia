@@ -57,6 +57,9 @@ td.g{font:700 .8rem var(--display);letter-spacing:.06em;text-transform:uppercase
 .m.ok{color:var(--ok)}.m.part{color:var(--part)}.m.no{color:var(--no)}
 td small{display:block;color:var(--mut);font-weight:400;white-space:normal}
 .note{border-left:4px solid var(--accent);padding:10px 14px;background:color-mix(in srgb,var(--accent) 8%,var(--paper));border-radius:0 10px 10px 0}
+.pick{font:600 1rem var(--body);border:2px solid var(--accent);background:transparent;color:var(--accent);border-radius:12px;padding:10px 16px;cursor:pointer;justify-self:start}
+.pick[aria-pressed="true"]{background:var(--accent);color:#fff}
+.pick[aria-pressed="true"]::after{content:" ✓ записано на карті ідей";font-weight:400}
 @media (max-width:700px){.walls{grid-template-columns:1fr}}
 </style>
 </head>
@@ -65,6 +68,7 @@ td small{display:block;color:var(--mut);font-weight:400;white-space:normal}
 <header>
   <a href="karta-idei.html">← Карта ідей</a>
   <h1>Як виглядатиме стіна</h1>
+  <p>Подивилась і вирішила? Натисни «Обираю…» під потрібною стіною: вибір одразу запишеться на <a href="karta-idei.html">карті ідей</a>.</p>
   <p>Тут дві стіни над ліжком, намальовані в одному масштабі, вночі. Ліва — <b>фігура</b> з 50 світлових пікселів на магнітах. Права — <b>картина-квадрат</b> з 256 квадратиків (16 рядів по 16), розміром приблизно 53 × 53 см. Обери ідею кнопкою внизу, і подивись, як вона виглядатиме на кожній стіні.</p>
 </header>
 
@@ -74,12 +78,14 @@ td small{display:block;color:var(--mut);font-weight:400;white-space:normal}
     <div class="sub">50 пікселів діаметром 12 мм на дроті · магнітна дошка ≈ 80 × 75 см</div>
     <canvas id="cvF" aria-label="Стіна з фігурою з пікселів"></canvas>
     <div class="verdict" id="vF" aria-live="polite"></div>
+    <button class="pick" type="button" data-pick="Фігура з пікселів на магнітах">Обираю фігуру</button>
   </section>
   <section class="wall">
     <h2>Картина-квадрат</h2>
     <div class="sub">256 світлодіодів, 16 × 16 · крок ≈ 3,3 см · ≈ 53 × 53 см</div>
     <canvas id="cvM" aria-label="Стіна з картиною-квадратом"></canvas>
     <div class="verdict" id="vM" aria-live="polite"></div>
+    <button class="pick" type="button" data-pick="Картина-квадрат, яку малюєш з телефона">Обираю картину</button>
   </section>
 </div>
 
@@ -314,6 +320,14 @@ document.getElementById('shape').textContent='Інша фігура (зараз:
 function frame(now){const t=(now-t0)/1000,dt=Math.min(.1,(now-last)/1000);last=now;
   cur.f(LF,t,dt);cur.f(LM,t,dt);scene(cvF,LF);scene(cvM,LM);requestAnimationFrame(frame);}
 ui();requestAnimationFrame(frame);
+
+// ---------- вибір записується на карту ідей (той самий пристрій) ----------
+const KEY='karta-idei-v1';
+function readSt(){try{return JSON.parse(localStorage.getItem(KEY)||'null')||{};}catch(e){return {};}}
+function markPick(){const f=readSt().first||'';document.querySelectorAll('.pick').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.pick===f)));}
+document.querySelectorAll('.pick').forEach(b=>b.addEventListener('click',()=>{const st=readSt();
+  st.first=st.first===b.dataset.pick?'':b.dataset.pick;try{localStorage.setItem(KEY,JSON.stringify(st));}catch(e){}markPick();}));
+markPick();
 
 // ---------- таблиця ідей ----------
 const T=[
