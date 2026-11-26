@@ -1,0 +1,263 @@
+<!doctype html>
+<html lang="uk">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Карта ідей</title>
+<meta name="description" content="Обираємо ідеї для розумного світла в кімнаті: складність, ціна, що подобається.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Rubik:wght@500;700&family=Golos+Text:wght@400;600&display=swap">
+<style>
+/* Layout: одна колонка; зверху «жива» стрічка світлодіодів, далі групи карток-ідей, внизу підсумок */
+:root{
+  --bg:#f1f0f7; --paper:#ffffff; --ink:#1e1b2e; --mut:#615c78; --line:#d6d2e6;
+  --want:#d63c8a; --later:#c98a00; --no:#7d7896; --accent:#5b3fd6;
+  --display:"Rubik",system-ui,sans-serif; --body:"Golos Text",system-ui,sans-serif;
+}
+@media (prefers-color-scheme: dark){:root{
+  --bg:#13111c; --paper:#1d1a29; --ink:#ece9f7; --mut:#a49fbc; --line:#332e47;
+  --want:#ff6fb1; --later:#f0b429; --no:#8f8aa8; --accent:#9d87ff; color-scheme:dark}}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:17px/1.55 var(--body);
+  padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:24px 56px}
+main{max-width:760px;margin:0 auto;display:grid;gap:22px}
+h1,h2,h3{font-family:var(--display);line-height:1.2;margin:0;text-wrap:balance}
+h1{font-size:2.2rem}h2{font-size:1.4rem}h3{font-size:1.1rem}
+p{margin:0}
+a{color:var(--accent)}
+header{display:grid;gap:10px}
+.strip{display:flex;gap:6px;flex-wrap:nowrap;overflow:hidden;padding:10px 12px;border-radius:12px;background:#0d0b14}
+.strip i{flex:0 0 auto;width:14px;height:14px;border-radius:50%;background:#333}
+.how{display:grid;gap:6px;background:var(--paper);border:1px solid var(--line);border-radius:14px;padding:16px 18px}
+.legend{display:flex;flex-wrap:wrap;gap:8px 16px;color:var(--mut);font-size:.92rem}
+.group{display:grid;gap:12px}
+.group>p{color:var(--mut)}
+.idea{background:var(--paper);border:1px solid var(--line);border-radius:14px;padding:16px 18px;display:grid;gap:10px;min-width:0;border-left:6px solid var(--line)}
+.idea[data-r="want"]{border-left-color:var(--want)}
+.idea[data-r="later"]{border-left-color:var(--later)}
+.idea[data-r="no"]{border-left-color:var(--no);opacity:.75}
+.idea.base{border-left-color:var(--accent)}
+.meta{display:flex;flex-wrap:wrap;gap:6px 14px;font-size:.9rem;color:var(--mut)}
+.meta b{color:var(--ink);font-weight:600}
+.stars{letter-spacing:2px;color:var(--later)}
+.tag{display:inline-block;font:600 .75rem var(--body);padding:2px 8px;border-radius:99px;background:color-mix(in srgb,var(--accent) 16%,transparent);color:var(--accent)}
+.idea ul{margin:0;padding-left:1.2em;display:grid;gap:4px}
+.how-it{font-size:.95rem;color:var(--mut)}
+.rate{display:flex;flex-wrap:wrap;gap:8px}
+.rate button{font:600 .95rem var(--body);border:2px solid var(--line);background:transparent;color:var(--ink);border-radius:99px;padding:8px 14px;cursor:pointer}
+.rate button[aria-pressed="true"][data-v="want"]{background:var(--want);border-color:var(--want);color:#fff}
+.rate button[aria-pressed="true"][data-v="later"]{background:var(--later);border-color:var(--later);color:#1e1b2e}
+.rate button[aria-pressed="true"][data-v="no"]{background:var(--no);border-color:var(--no);color:#fff}
+button:focus-visible,input:focus-visible,textarea:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
+.card{background:var(--paper);border:1px solid var(--line);border-radius:14px;padding:18px;display:grid;gap:12px;min-width:0}
+.choice{display:grid;gap:8px}
+.choice label{display:flex;gap:10px;align-items:flex-start;cursor:pointer}
+.choice input{width:20px;height:20px;margin-top:3px;accent-color:var(--accent);flex:0 0 auto}
+.field{display:grid;gap:6px;font-weight:600}
+.field input,.field textarea{font:1rem var(--body);padding:10px 12px;border:1px solid var(--line);border-radius:10px;background:var(--bg);color:var(--ink);width:100%}
+.field textarea{min-height:90px;resize:vertical}
+ol.top{margin:0;padding-left:1.4em;display:grid;gap:8px}
+ol.top li{display:flex;gap:8px;align-items:center;justify-content:space-between}
+ol.top li span{min-width:0}
+.mv{display:flex;gap:4px;flex:0 0 auto}
+.mv button{font:600 .9rem var(--body);width:36px;height:32px;border:1px solid var(--line);background:var(--bg);color:var(--ink);border-radius:8px;cursor:pointer}
+.empty{color:var(--mut)}
+.small{color:var(--mut);font-size:.92rem}
+.btn{font:600 1rem var(--body);border:0;border-radius:12px;padding:14px 18px;background:var(--accent);color:#fff;cursor:pointer;justify-self:start}
+.btn.ghost{background:transparent;color:var(--mut);border:1px solid var(--line)}
+pre.out{margin:0;white-space:pre-wrap;background:var(--bg);border:1px solid var(--line);border-radius:10px;padding:12px;font-size:.9rem;max-height:260px;overflow:auto}
+.row{display:flex;flex-wrap:wrap;gap:10px}
+@media (prefers-reduced-motion:reduce){.strip i{transition:none}}
+</style>
+</head>
+<body>
+<main>
+<header>
+  <a href="../">← Майстерня</a>
+  <div class="strip" id="strip" aria-hidden="true"></div>
+  <h1>Карта ідей: розумне світло</h1>
+  <p>Тут зібрані всі твої ідеї (і одна татова). Біля кожної написано, як її можна зробити, наскільки це складно і скільки приблизно коштує. Познач, що ти <b>дуже хочеш</b>, що <b>можна потім</b>, а що <b>не треба</b>. Внизу розстав улюблені ідеї по порядку: з першої ми почнемо.</p>
+</header>
+
+<section class="how">
+  <h3>Як читати картки</h3>
+  <div class="legend">
+    <span><span class="stars">★</span> — зробимо за вечір</span>
+    <span><span class="stars">★★★★★</span> — великий складний проєкт</span>
+    <span><b>₴</b> — дешево · <b>₴₴</b> — помірно · <b>₴₴₴</b> — дорого</span>
+  </div>
+  <p class="small">«Є у WLED» означає, що це вже вміє готова безкоштовна програма для світлодіодних стрічок. Таке можна побачити працюючим дуже швидко, а потім написати своє.</p>
+</section>
+
+<div id="groups"></div>
+
+<section class="card">
+  <h2>Два важливих рішення</h2>
+
+  <div class="choice" role="radiogroup" aria-labelledby="q1">
+    <h3 id="q1">Як програмуємо?</h3>
+    <label><input type="radio" name="fw" value="Готова програма WLED"> <span><b>Готова програма WLED.</b> Світло на стіні вже за один вечір, але програмувати майже нічого не будеш.</span></label>
+    <label><input type="radio" name="fw" value="Тільки своя програма"> <span><b>Тільки своя програма.</b> Усе напишемо самі, але перший результат буде через кілька тижнів.</span></label>
+    <label><input type="radio" name="fw" value="Разом: спочатку WLED, потім своя"> <span><b>Разом.</b> Спочатку WLED, щоб швидко засвітилось, а потім своя програма з твоїми ідеями: оплески, гра, світло при відключеннях. <i>Тато і Claude радять цей варіант.</i></span></label>
+  </div>
+
+  <div class="choice" role="radiogroup" aria-labelledby="q2">
+    <h3 id="q2">Що буде на стіні першим?</h3>
+    <label><input type="radio" name="first" value="Фігура з пікселів на магнітах"> <span><b>Фігура</b> з пікселів на магнітах, яку можна переставляти.</span></label>
+    <label><input type="radio" name="first" value="Картина-квадрат, яку малюєш з телефона"> <span><b>Картина-квадрат</b>, яку малюєш з телефона.</span></label>
+    <label><input type="radio" name="first" value="Смуга по периметру кімнати"> <span><b>Смуга</b> по периметру кімнати.</span></label>
+  </div>
+
+  <label class="field" for="name">Як назвемо проєкт?
+    <input type="text" id="name" placeholder="Наприклад: Чарівне світло, Світлячок, Розумна стіна…">
+  </label>
+  <label class="field" for="newideas">Мої нові ідеї
+    <textarea id="newideas" placeholder="Якщо щось придумаєш, пиши сюди"></textarea>
+  </label>
+</section>
+
+<section class="card">
+  <h2>Мої улюблені по порядку</h2>
+  <p class="small">Сюди потрапляють ідеї з позначкою «Дуже хочу». Стрілками постав найулюбленішу першою.</p>
+  <ol class="top" id="top"></ol>
+  <p class="empty" id="topEmpty">Поки що порожньо. Познач ідеї вище кнопкою «Дуже хочу».</p>
+</section>
+
+<section class="card">
+  <h2>Готово? Надішли результат</h2>
+  <p class="small">Кнопка скопіює всі твої відповіді. Тато вставить їх у розмову з Claude, і ми складемо план.</p>
+  <div class="row">
+    <button class="btn" id="copy" type="button">Скопіювати результат</button>
+    <button class="btn ghost" id="reset" type="button">Почати спочатку</button>
+  </div>
+  <p class="small" id="resetAsk" hidden>Точно стерти всі позначки? <button class="btn ghost" id="resetYes" type="button" style="padding:6px 12px">Так, стерти</button></p>
+  <pre class="out" id="out"></pre>
+</section>
+</main>
+
+<script>
+const GROUPS=[
+ {t:'Основа',d:'Це буде в будь-якому разі: без цього решта не працює.',items:[
+  {id:'strip',base:true,t:'Стрічка, де кожен світлодіод горить окремо',what:'Кожна «лампочка» може світити своїм кольором і яскравістю.',how:'Адресна RGB-стрічка: у кожному світлодіоді свій крихітний чип. Керує нею один контролер ESP32 по одному дроту. Найкраще брати стрічку з окремим білим кольором (SK6812 RGBW): ранкове й нічне світло буде теплим і приємним.',s:1,p:'₴₴',w:''},
+  {id:'fade',base:true,t:'Плавно загоряється і плавно гасне',what:'Ніяких різких спалахів: світло наростає й тане.',how:'Яскравість змінюється маленькими кроками, як плавний розгін в уроці 3.',s:1,p:'0',w:'yes'},
+  {id:'fx',base:true,t:'Ефекти: мерехтіння, веселка, біжучий вогник',what:'Світиться не одним кольором, а цікаво: переливи, хвилі, «дихання».',how:'Кожен ефект — маленька програма. Можна придумувати й програмувати свої!',s:2,p:'0',w:'yes'}
+ ]},
+ {t:'Де світить',d:'Обери, якою буде світлова стіна.',items:[
+  {id:'figure',t:'Фігура з пікселів, яку можна переставляти',what:'Складаєш із світлових «крапок» зірку, серце, кота, а потім переставляєш в іншу фігуру.',how:'Пікселі на дроті (як гірлянда), кожен у маленькому тримачі з магнітом. Тримачі надрукуємо на 3D-принтері, а тримаються вони на магнітній дошці. Після перестановки показуєш на телефоні, де тепер кожен піксель.',vars:['Простіше: відрізки стрічки, спаяні в одну незмінну фігуру (★★)','Найскладніше: плитки, що з\'єднуються магнітами без дротів (★★★★★, потім)'],s:2,p:'₴₴',w:'part'},
+  {id:'matrix',t:'Картина-квадрат, яку малюєш з телефона',what:'На стіні квадрат із маленьких світлових квадратиків. На телефоні такий самий: розфарбовуєш клітинки, і вони загоряються на стіні.',how:'Світлодіодна матриця 16×16 (256 пікселів) або більша саморобна. На телефоні сторінка-сітка для малювання. На матриці можна показувати ще й цифри та стрілки для ігор.',s:3,p:'₴₴',w:'part'},
+  {id:'perimeter',t:'Смуга по периметру кімнати',what:'Світиться вся кімната: смуга вгорі під стелею або внизу біля підлоги.',how:'12–20 метрів стрічки в алюмінієвому профілі з матовою кришкою. Електроніка проста, а от грошей і роботи з монтажем багато.',s:2,p:'₴₴₴',w:'yes'}
+ ]},
+ {t:'Як керувати',d:'Можна обрати кілька способів.',items:[
+  {id:'clap',t:'Оплески',what:'Один оплеск — плавно вмикається. Ще один — інший колір. Два оплески — плавно гасне.',how:'Маленький цифровий мікрофон слухає різкі гучні звуки й рахує їх. Складність: двері, що грюкнули, чи музика теж «плескають», тому потрібні режими.',s:3,p:'₴',w:''},
+  {id:'motion',t:'Рух і жести',what:'Зайшла в кімнату — увімкнулось. Махнула рукою — змінився колір.',how:'Датчик руху помічає людину. Датчик жестів розуміє, куди махнула рукою: вліво, вправо, вгору чи вниз.',s:2,p:'₴',w:'part'},
+  {id:'voice',t:'Голос: «привіт», «бувай», «гра»',what:'Сказала слово — світло зробило, що треба.',how:'Найпростіше — через телефон, який розпізнає слова. Ще є модулі, які можна навчити своїм словам. Це одна з найскладніших ідей, краще залишити на потім.',s:4,p:'0–₴₴',w:''},
+  {id:'remote',t:'Пульт',what:'Кнопки з кольорами й цифрами, як у телевізора.',how:'Інфрачервоний приймач і готовий пульт. Підійде навіть старий пульт від телевізора.',s:1,p:'₴',w:'yes'},
+  {id:'phone',t:'Телефон',what:'Усе керування в телефоні чи планшеті: колір, яскравість, ефекти, будильник, малювання, ігри.',how:'Контролер показує свою сторінку, як пульт локомотива. Нічого встановлювати не треба. Дизайн кнопок придумуєш ти!',s:3,p:'0',w:'yes'}
+ ]},
+ {t:'Музика',d:'',items:[
+  {id:'music',t:'Світломузика в такт',what:'Грає музика, і стіна переливається кольорами та спалахує на кожен удар.',how:'Той самий мікрофон, що й для оплесків. Програма розкладає звук на баси, середину й високі звуки та розфарбовує їх різними кольорами.',s:4,p:'₴',w:'yes'}
+ ]},
+ {t:'Ігри',d:'',items:[
+  {id:'guess',t:'«Вгадай число»',what:'Світло загадує число. Ти називаєш своє: більше — синій, менше — червоний, вгадала — веселка!',how:'Число вводиш кнопками-цифрами на пульті або на телефоні. Це ідеальна перша повністю твоя програма: майже як у Scratch.',s:2,p:'0',w:''}
+ ]},
+ {t:'Час',d:'',items:[
+  {id:'alarm',t:'Будильник-світанок',what:'Узимку зранку темно. За 20–30 хвилин до будильника світло повільно розгоряється, як світанок, і будить.',how:'Годинник бере час з інтернету, а маленький модуль годинника з батарейкою не дає йому збитися при відключеннях. Час і дні тижня налаштовуєш на телефоні.',s:2,p:'₴',w:'yes'},
+  {id:'outage',t:'Відключення світла (татова ідея)',what:'Пропало світло — стіна сама вмикається як ліхтарик. А ще може заздалегідь попереджати: «через 30 хвилин відключення».',how:'Стіна живиться через маленький акумулятор, як павербанк. Помітила, що світло зникло, — увімкнулась м\'яким білим. Графік відключень можна брати з інтернету (це найскладніша частина) або просто вводити на телефоні.',s:3,p:'₴₴',w:''}
+ ]}
+];
+const ALL=GROUPS.flatMap(g=>g.items);
+const KEY='karta-idei-v1';
+let st={r:{},order:[],fw:'',first:'',name:'',newideas:''};
+try{const s=JSON.parse(localStorage.getItem(KEY)||'null');if(s)st=Object.assign(st,s);}catch(e){}
+function save(){try{localStorage.setItem(KEY,JSON.stringify(st));}catch(e){}}
+const W={yes:'Є у WLED',part:'Частково є у WLED'};
+const LBL={want:'Дуже хочу',later:'Можна потім',no:'Не треба'};
+
+function esc(s){return s.replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));}
+function render(){
+  const root=document.getElementById('groups');root.innerHTML='';
+  GROUPS.forEach(g=>{
+    const sec=document.createElement('section');sec.className='group';
+    sec.innerHTML='<h2>'+esc(g.t)+'</h2>'+(g.d?'<p>'+esc(g.d)+'</p>':'');
+    g.items.forEach(it=>{
+      const el=document.createElement('article');el.className='idea'+(it.base?' base':'');
+      if(st.r[it.id])el.dataset.r=st.r[it.id];
+      let h='<h3>'+esc(it.t)+'</h3><p>'+esc(it.what)+'</p><p class="how-it"><b>Як зробити:</b> '+esc(it.how)+'</p>';
+      if(it.vars)h+='<ul class="how-it">'+it.vars.map(v=>'<li>'+esc(v)+'</li>').join('')+'</ul>';
+      h+='<div class="meta"><span>Складність <span class="stars">'+'★'.repeat(it.s)+'</span></span><span>Ціна <b>'+it.p+'</b></span>'+(it.w?'<span class="tag">'+W[it.w]+'</span>':'')+'</div>';
+      if(!it.base){
+        h+='<div class="rate" role="group" aria-label="Як тобі ця ідея?">'+['want','later','no'].map(v=>'<button type="button" data-v="'+v+'" aria-pressed="'+(st.r[it.id]===v)+'">'+LBL[v]+'</button>').join('')+'</div>';
+      }else h+='<div class="meta"><span class="tag">Основа</span></div>';
+      el.innerHTML=h;
+      el.querySelectorAll('.rate button').forEach(b=>b.addEventListener('click',()=>{
+        const v=b.dataset.v;
+        if(st.r[it.id]===v){delete st.r[it.id];}else st.r[it.id]=v;
+        st.order=st.order.filter(x=>x!==it.id);
+        if(st.r[it.id]==='want')st.order.push(it.id);
+        el.dataset.r=st.r[it.id]||'';
+        el.querySelectorAll('.rate button').forEach(x=>x.setAttribute('aria-pressed',String(st.r[it.id]===x.dataset.v)));
+        save();renderTop();renderOut();
+      }));
+      sec.appendChild(el);
+    });
+    root.appendChild(sec);
+  });
+}
+function title(id){return (ALL.find(i=>i.id===id)||{}).t||id;}
+function renderTop(){
+  st.order=st.order.filter(id=>st.r[id]==='want');
+  const ol=document.getElementById('top');ol.innerHTML='';
+  document.getElementById('topEmpty').hidden=st.order.length>0;
+  st.order.forEach((id,i)=>{
+    const li=document.createElement('li');
+    li.innerHTML='<span>'+esc(title(id))+'</span><span class="mv"><button type="button" aria-label="Вище">↑</button><button type="button" aria-label="Нижче">↓</button></span>';
+    const [up,dn]=li.querySelectorAll('button');
+    up.disabled=i===0;dn.disabled=i===st.order.length-1;
+    up.addEventListener('click',()=>{[st.order[i-1],st.order[i]]=[st.order[i],st.order[i-1]];save();renderTop();renderOut();});
+    dn.addEventListener('click',()=>{[st.order[i+1],st.order[i]]=[st.order[i],st.order[i+1]];save();renderTop();renderOut();});
+    ol.appendChild(li);
+  });
+}
+function list(v){return ALL.filter(i=>st.r[i.id]===v).map(i=>'- '+i.t).join('\n')||'- (нічого)';}
+function renderOut(){
+  const t=['КАРТА ІДЕЙ — результат',
+   'Назва проєкту: '+(st.name||'(ще не придумали)'),
+   'Як програмуємо: '+(st.fw||'(не обрано)'),
+   'Перше на стіні: '+(st.first||'(не обрано)'),
+   '','Дуже хочу (по порядку):',st.order.length?st.order.map((id,i)=>(i+1)+'. '+title(id)).join('\n'):'- (нічого)',
+   '','Можна потім:',list('later'),'','Не треба:',list('no'),
+   '','Нові ідеї:',st.newideas||'- (немає)'].join('\n');
+  document.getElementById('out').textContent=t;return t;
+}
+function bindForm(){
+  document.querySelectorAll('input[name=fw]').forEach(r=>{r.checked=r.value===st.fw;r.addEventListener('change',()=>{st.fw=r.value;save();renderOut();});});
+  document.querySelectorAll('input[name=first]').forEach(r=>{r.checked=r.value===st.first;r.addEventListener('change',()=>{st.first=r.value;save();renderOut();});});
+  const n=document.getElementById('name'),ni=document.getElementById('newideas');
+  n.value=st.name;ni.value=st.newideas;
+  n.addEventListener('input',()=>{st.name=n.value;save();renderOut();});
+  ni.addEventListener('input',()=>{st.newideas=ni.value;save();renderOut();});
+}
+document.getElementById('copy').addEventListener('click',e=>{
+  const b=e.currentTarget,t=renderOut(),old=b.textContent;
+  const sel=()=>{const r=document.createRange();r.selectNodeContents(document.getElementById('out'));const s=getSelection();s.removeAllRanges();s.addRange(r);b.textContent='Виділено — скопіюй вручну';setTimeout(()=>b.textContent=old,2500);};
+  if(navigator.clipboard&&navigator.clipboard.writeText){navigator.clipboard.writeText(t).then(()=>{b.textContent='Скопійовано!';setTimeout(()=>b.textContent=old,1800);}).catch(sel);}else sel();
+});
+document.getElementById('reset').addEventListener('click',()=>{document.getElementById('resetAsk').hidden=false;});
+document.getElementById('resetYes').addEventListener('click',()=>{
+  st={r:{},order:[],fw:'',first:'',name:'',newideas:''};save();
+  document.getElementById('resetAsk').hidden=true;render();renderTop();bindForm();renderOut();
+});
+
+// жива стрічка: веселка, що біжить
+(function(){
+  const s=document.getElementById('strip'),n=48,dots=[];
+  for(let i=0;i<n;i++){const d=document.createElement('i');s.appendChild(d);dots.push(d);}
+  const reduce=matchMedia('(prefers-reduced-motion: reduce)').matches;let t=0;
+  function paint(){dots.forEach((d,i)=>{const h=(i*360/n+t)%360;d.style.background='hsl('+h+' 95% 60%)';d.style.boxShadow='0 0 8px hsl('+h+' 95% 60%)';});}
+  paint();if(!reduce)setInterval(()=>{t=(t+6)%360;paint();},60);
+})();
+
+render();renderTop();bindForm();renderOut();
+</script>
+</body>
+</html>
