@@ -1,0 +1,353 @@
+<!doctype html>
+<html lang="uk">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Як виглядатиме стіна</title>
+<meta name="description" content="Симулятор: фігура з пікселів на магнітах і картина-квадрат 50 × 50 см над ліжком. Порівнюємо, які ідеї де працюють.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Rubik:wght@500;700&family=Golos+Text:wght@400;600&display=swap">
+<style>
+/* Layout: зверху дві «стіни» поруч (на телефоні одна під одною), під ними кнопки ідей, далі таблиця ідей */
+:root{
+  --bg:#f1f0f7; --paper:#ffffff; --ink:#1e1b2e; --mut:#615c78; --line:#d6d2e6;
+  --ok:#1f8f50; --part:#b47b00; --no:#c23b3b; --accent:#5b3fd6;
+  --display:"Rubik",system-ui,sans-serif; --body:"Golos Text",system-ui,sans-serif;
+}
+@media (prefers-color-scheme: dark){:root{
+  --bg:#13111c; --paper:#1d1a29; --ink:#ece9f7; --mut:#a49fbc; --line:#332e47;
+  --ok:#3cbf75; --part:#f0b429; --no:#ef6262; --accent:#9d87ff; color-scheme:dark}}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:17px/1.55 var(--body);
+  padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:24px 56px}
+main{max-width:1000px;margin:0 auto;display:grid;gap:22px}
+h1,h2,h3{font-family:var(--display);line-height:1.2;margin:0;text-wrap:balance}
+h1{font-size:2.1rem}h2{font-size:1.4rem}h3{font-size:1.15rem}
+p{margin:0}
+a{color:var(--accent)}
+header{display:grid;gap:10px;max-width:720px}
+.walls{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px}
+.wall{background:var(--paper);border:1px solid var(--line);border-radius:14px;padding:12px;display:grid;gap:10px;min-width:0}
+.wall h2{font-size:1.15rem}
+.wall .sub{color:var(--mut);font-size:.9rem}
+canvas{width:100%;aspect-ratio:160/128;display:block;border-radius:10px;touch-action:manipulation;background:#141824}
+.verdict{display:flex;gap:10px;align-items:flex-start;font-size:.95rem;min-height:3em}
+.chip{flex:0 0 auto;font:600 .8rem var(--body);padding:3px 10px;border-radius:99px;color:#fff}
+.chip.ok{background:var(--ok)}.chip.part{background:var(--part);color:#1e1b2e}.chip.no{background:var(--no)}
+.demos{display:flex;flex-wrap:wrap;gap:8px}
+.demos button{font:600 .95rem var(--body);border:2px solid var(--line);background:var(--paper);color:var(--ink);border-radius:99px;padding:8px 14px;cursor:pointer}
+.demos button[aria-pressed="true"]{background:var(--accent);border-color:var(--accent);color:#fff}
+button:focus-visible,input:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
+.panel{background:var(--paper);border:1px solid var(--line);border-radius:14px;padding:16px;display:grid;gap:10px}
+.tools{display:flex;flex-wrap:wrap;gap:10px;align-items:center}
+.tools[hidden]{display:none}
+.sw{width:34px;height:34px;border-radius:50%;border:3px solid transparent;cursor:pointer}
+.sw[aria-pressed="true"]{border-color:var(--ink)}
+.btn{font:600 .95rem var(--body);border:0;border-radius:10px;padding:10px 14px;background:var(--accent);color:#fff;cursor:pointer}
+.btn.ghost{background:transparent;color:var(--ink);border:1px solid var(--line)}
+.tools input[type=number]{font:1.1rem var(--body);width:90px;padding:8px 10px;border:1px solid var(--line);border-radius:10px;background:var(--bg);color:var(--ink)}
+.tools input[type=color]{width:56px;height:40px;border:0;background:none;padding:0}
+.hint{color:var(--mut);font-size:.95rem}
+.table-wrap{overflow-x:auto}
+table{border-collapse:collapse;width:100%;font-size:.95rem}
+th,td{text-align:left;padding:9px 10px;border-bottom:1px solid var(--line);vertical-align:top}
+th{font-family:var(--display);font-weight:500;color:var(--mut)}
+td.g{font:700 .8rem var(--display);letter-spacing:.06em;text-transform:uppercase;color:var(--accent);padding-top:18px}
+.m{white-space:nowrap;font-weight:600}
+.m.ok{color:var(--ok)}.m.part{color:var(--part)}.m.no{color:var(--no)}
+td small{display:block;color:var(--mut);font-weight:400;white-space:normal}
+.note{border-left:4px solid var(--accent);padding:10px 14px;background:color-mix(in srgb,var(--accent) 8%,var(--paper));border-radius:0 10px 10px 0}
+@media (max-width:700px){.walls{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<main>
+<header>
+  <a href="karta-idei.html">← Карта ідей</a>
+  <h1>Як виглядатиме стіна</h1>
+  <p>Тут дві стіни над ліжком, намальовані в одному масштабі, вночі. Ліва — <b>фігура</b> з 50 світлових пікселів на магнітах. Права — <b>картина-квадрат</b> з 256 квадратиків (16 рядів по 16), розміром приблизно 53 × 53 см. Обери ідею кнопкою внизу, і подивись, як вона виглядатиме на кожній стіні.</p>
+</header>
+
+<div class="walls">
+  <section class="wall">
+    <h2>Фігура на магнітах</h2>
+    <div class="sub">50 пікселів діаметром 12 мм на дроті · магнітна дошка ≈ 80 × 75 см</div>
+    <canvas id="cvF" aria-label="Стіна з фігурою з пікселів"></canvas>
+    <div class="verdict" id="vF" aria-live="polite"></div>
+  </section>
+  <section class="wall">
+    <h2>Картина-квадрат</h2>
+    <div class="sub">256 світлодіодів, 16 × 16 · крок ≈ 3,3 см · ≈ 53 × 53 см</div>
+    <canvas id="cvM" aria-label="Стіна з картиною-квадратом"></canvas>
+    <div class="verdict" id="vM" aria-live="polite"></div>
+  </section>
+</div>
+
+<section class="panel">
+  <h3>Обери ідею</h3>
+  <div class="demos" id="demos" role="group" aria-label="Ідеї для показу"></div>
+  <div class="tools" id="tDraw" hidden>
+    <span class="hint">Торкайся квадратиків або пікселів, щоб розфарбувати:</span>
+    <span id="palette" class="tools"></span>
+    <button class="btn ghost" id="clear" type="button">Очистити</button>
+  </div>
+  <div class="tools" id="tGuess" hidden>
+    <label for="guess" class="hint">Світло загадало число від 1 до 99. Твоє число:</label>
+    <input type="number" id="guess" min="1" max="99" inputmode="numeric">
+    <button class="btn" id="check" type="button">Перевірити</button>
+    <button class="btn ghost" id="newGame" type="button">Нова гра</button>
+    <span id="guessMsg" class="hint"></span>
+  </div>
+  <div class="tools" id="tColor" hidden>
+    <label for="cham" class="hint">Колір іграшки, яку піднесли до датчика:</label>
+    <input type="color" id="cham" value="#ff4fa3">
+  </div>
+  <div class="tools" id="tFigure">
+    <span class="hint">Пікселі фігури можна переставити:</span>
+    <button class="btn ghost" id="shape" type="button">Інша фігура</button>
+  </div>
+  <p class="hint" id="demoNote"></p>
+</section>
+
+<section class="panel">
+  <h2>Які ідеї на якій стіні працюють</h2>
+  <p class="hint">✅ добре · ⚠️ працює, але простіше · ❌ не вийде</p>
+  <div class="table-wrap"><table>
+    <thead><tr><th>Ідея</th><th>Фігура</th><th>Картина-квадрат</th></tr></thead>
+    <tbody id="tbl"></tbody>
+  </table></div>
+  <p class="note">Смугу по периметру кімнати зробимо наприкінці проєкту. Її підключимо до того самого контролера, тож нічого не доведеться переробляти.</p>
+</section>
+</main>
+
+<script>
+(function(){
+// ---------- геометрія сцени (сантиметри) ----------
+const CW=160,CH=128, BED_TOP=78;
+const M={size:53,n:16}; M.x0=(CW-M.size)/2; M.y0=BED_TOP-14-M.size;
+const BOARD={w:80,h:75}; BOARD.x0=(CW-BOARD.w)/2; BOARD.y0=BED_TOP-10-BOARD.h;
+const FC={x:CW/2,y:BOARD.y0+BOARD.h/2};
+
+function hsl(h,s,l){h=((h%360)+360)%360/360;let r,g,b;
+  if(s===0){r=g=b=l;}else{const q=l<.5?l*(1+s):l+s-l*s,p=2*l-q;
+  const f=t=>{if(t<0)t+=1;if(t>1)t-=1;if(t<1/6)return p+(q-p)*6*t;if(t<1/2)return q;if(t<2/3)return p+(q-p)*(2/3-t)*6;return p;};
+  r=f(h+1/3);g=f(h);b=f(h-1/3);}return [r*255,g*255,b*255];}
+function hex(h){const n=parseInt(h.slice(1),16);return [(n>>16)&255,(n>>8)&255,n&255];}
+function mul(c,k){return [c[0]*k,c[1]*k,c[2]*k];}
+function lerp(a,b,t){return [a[0]+(b[0]-a[0])*t,a[1]+(b[1]-a[1])*t,a[2]+(b[2]-a[2])*t];}
+
+// ---------- фігури з 50 точок ----------
+function samplePoly(v,n){const seg=[];let L=0;for(let i=0;i<v.length;i++){const a=v[i],b=v[(i+1)%v.length],d=Math.hypot(b[0]-a[0],b[1]-a[1]);seg.push([a,b,d]);L+=d;}
+  const out=[],step=L/n;let acc=0,si=0,pos=0;
+  for(let k=0;k<n;k++){const target=k*step;while(acc+seg[si][2]<target){acc+=seg[si][2];si++;}const [a,b,d]=seg[si],t=(target-acc)/d;out.push([a[0]+(b[0]-a[0])*t,a[1]+(b[1]-a[1])*t]);}
+  return out;}
+const SHAPES=[
+ {name:'зірка',pts:(()=>{const v=[];for(let i=0;i<10;i++){const r=i%2?14:35,a=-Math.PI/2+i*Math.PI/5;v.push([Math.cos(a)*r,Math.sin(a)*r+3]);}return samplePoly(v,50);})()},
+ {name:'серце',pts:(()=>{const v=[];for(let i=0;i<120;i++){const t=i/120*2*Math.PI;v.push([2.1*16*Math.pow(Math.sin(t),3),-2.1*(13*Math.cos(t)-5*Math.cos(2*t)-2*Math.cos(3*t)-Math.cos(4*t))-2]);}return samplePoly(v,50);})()},
+ {name:'місяць',pts:(()=>{const v=[],R=Math.PI/180;
+   for(let i=0;i<=30;i++){const a=(-53.8-i*252.4/30)*R;v.push([32*Math.cos(a),32*Math.sin(a)]);}
+   for(let i=1;i<20;i++){const a=(83.6+i*192.8/20)*R;v.push([16+26*Math.cos(a),26*Math.sin(a)]);}
+   return samplePoly(v.map(p=>[p[0]-4,p[1]]),50);})()}
+];
+let shapeIdx=0;
+
+// ---------- макети ----------
+function mkMatrix(){const pts=[],gx=[],gy=[];const s=M.size/M.n;
+  for(let y=0;y<M.n;y++)for(let x=0;x<M.n;x++){pts.push([M.x0+(x+.5)*s,M.y0+(y+.5)*s]);gx.push(x);gy.push(y);}
+  return finish({grid:true,pts,gx,gy,n:256});}
+function mkFigure(){const pts=SHAPES[shapeIdx].pts.map(p=>[FC.x+p[0],FC.y+p[1]]);return finish({grid:false,pts,n:pts.length});}
+function finish(L){let a=1e9,b=-1e9,c=1e9,d=-1e9;L.pts.forEach(p=>{a=Math.min(a,p[0]);b=Math.max(b,p[0]);c=Math.min(c,p[1]);d=Math.max(d,p[1]);});
+  L.nx=L.pts.map(p=>(p[0]-a)/(b-a||1));L.ny=L.pts.map(p=>(p[1]-c)/(d-c||1));L.buf=L.pts.map(()=>[0,0,0]);
+  L.draw=L.pts.map(()=>null);return L;}
+let LM=mkMatrix(),LF=mkFigure();
+
+// ---------- шрифт цифр 3×5 ----------
+const DIG=['111101101101111','010110010010111','111001111100111','111001111001111','101101111001001','111100111001111','111100111101111','111001010010010','111101111101111','111101111001111'];
+function digit(set,d,x0,y0,c){const p=DIG[d];for(let i=0;i<15;i++)if(p[i]==='1')set(x0+i%3,y0+Math.floor(i/3),c);}
+function gridSetter(L){return (x,y,c)=>{if(x>=0&&x<16&&y>=0&&y<16)L.buf[y*16+x]=c;};}
+function clear(L){L.buf.forEach((_,i)=>L.buf[i]=[0,0,0]);}
+
+// ---------- стан ігор ----------
+let secret=1+Math.floor(Math.random()*99),lastGuess=null,result=null,resultAt=0;
+const snake={body:[[4,8],[3,8],[2,8]],apple:[11,8],t:0};
+const seeds=Array.from({length:256},(_,i)=>({p:Math.sin(i*12.9898)*43758.5453%6.28,s:.8+((i*7)%10)/8}));
+let chamColor=hex('#ff4fa3'),drawColor=[255,79,163];
+
+// ---------- ідеї (демо) ----------
+const DEMOS=[
+ {id:'rainbow',t:'Веселка',
+  f:(L,t)=>L.buf.forEach((_,i)=>L.buf[i]=hsl((L.grid?L.nx[i]*300+L.ny[i]*60:i/L.n*360)+t*90,1,.5)),
+  v:{F:['ok','Веселка біжить по фігурі, з пікселя на піксель.'],M:['ok','Веселка переливається по всьому квадрату.']}},
+ {id:'fade',t:'Плавно вмикається',
+  f:(L,t)=>{const b=(1-Math.cos(t*1.3))/2;L.buf.forEach((_,i)=>L.buf[i]=mul([255,170,90],b));},
+  v:{F:['ok','Уся фігура плавно розгоряється і гасне.'],M:['ok','Квадрат плавно розгоряється і гасне.']}},
+ {id:'music',t:'Світломузика',
+  f:(L,t)=>{const bass=Math.exp(-((t%.5)*7));
+   if(L.grid){clear(L);const set=gridSetter(L);for(let x=0;x<16;x++){const lv=Math.max(0,Math.min(1,bass*(1-x/20)+.35*(.5+.5*Math.sin(t*(3+x*.7)+x*1.7))));const h=Math.round(lv*16);for(let y=0;y<h;y++)set(x,15-y,hsl(260-x*14,1,.5));}}
+   else{const c=hsl(t*40,1,.5);L.buf.forEach((_,i)=>L.buf[i]=mul(c,.15+.85*bass));}},
+  v:{F:['part','Уся фігура спалахує на кожен удар і міняє колір.'],M:['ok','Стовпчики еквалайзера стрибають у такт: баси зліва, високі справа.']}},
+ {id:'draw',t:'Малювання з телефона',tools:'tDraw',
+  f:(L)=>L.buf.forEach((_,i)=>L.buf[i]=L.draw[i]||[0,0,0]),
+  v:{F:['part','Можна фарбувати окремі пікселі фігури, але намалювати картинку не вийде.'],M:['ok','Малюєш будь-яку картинку квадратиками, як у піксель-арті.']}},
+ {id:'guess',t:'«Вгадай число»',tools:'tGuess',
+  f:(L,t)=>{clear(L);const fresh=t-resultAt<6;
+   if(result==='ok'){L.buf.forEach((_,i)=>L.buf[i]=hsl((L.grid?L.nx[i]*360:i/L.n*360)+t*200,1,.5));return;}
+   const c=result==='more'?[60,120,255]:result==='less'?[255,60,60]:null;
+   if(!L.grid){if(c&&fresh)L.buf.forEach((_,i)=>L.buf[i]=mul(c,.6+.4*Math.sin(t*6)));return;}
+   const set=gridSetter(L);
+   if(lastGuess!==null){digit(set,Math.floor(lastGuess/10),4,1,[255,255,255]);digit(set,lastGuess%10,9,1,[255,255,255]);}
+   if(c){const up=result==='more';for(let r=0;r<4;r++)for(let x=7-r;x<=8+r;x++)set(x,up?8+r:14-r,c);for(let y=0;y<3;y++){set(7,up?12+y:8+y,c);set(8,up?12+y:8+y,c);} }},
+  v:{F:['part','Відповідає тільки кольором: синій — загадане число більше, червоний — менше, веселка — вгадала.'],M:['ok','Показує твоє число і стрілку: вгору — загадане більше, вниз — менше. Вгадала — веселка.']}},
+ {id:'clock',t:'Годинник',
+  f:(L)=>{clear(L);if(!L.grid)return;const set=gridSetter(L),d=new Date(),h=d.getHours(),m=d.getMinutes();
+   digit(set,Math.floor(h/10),4,2,[255,170,80]);digit(set,h%10,9,2,[255,170,80]);digit(set,Math.floor(m/10),4,9,[90,200,255]);digit(set,m%10,9,9,[90,200,255]);},
+  v:{F:['no','Цифри з фігури не складеш.'],M:['ok','Години вгорі, хвилини внизу. Зараз показує справжній час.']}},
+ {id:'weather',t:'Погода зранку',
+  f:(L,t)=>{const sun=Math.floor(t/4)%2===0;clear(L);
+   if(!L.grid){L.buf.forEach((_,i)=>L.buf[i]=sun?[255,190,40]:mul([60,110,255],.6+.4*Math.sin(t*5+i)));return;}
+   const set=gridSetter(L);
+   if(sun){for(let y=0;y<16;y++)for(let x=0;x<16;x++){const d=Math.hypot(x-7.5,y-7.5);if(d<3.6)set(x,y,[255,200,40]);}
+     [[7,1],[8,1],[7,14],[8,14],[1,7],[1,8],[14,7],[14,8],[3,3],[12,3],[3,12],[12,12]].forEach(p=>set(p[0],p[1],[255,150,20]));}
+   else{for(let y=3;y<8;y++)for(let x=2;x<14;x++){if(Math.hypot((x-7.5)/6,(y-5.5)/2.6)<1)set(x,y,[170,180,200]);}
+     for(let k=0;k<6;k++){const x=3+k*2,y=9+Math.floor((t*6+k*3)%7);set(x,y,[60,130,255]);}}},
+  v:{F:['part','Тільки кольором: жовтий — сонце, синій — дощ.'],M:['ok','Малює сонце або хмару з дощем. По черзі кожні 4 секунди.']}},
+ {id:'sunrise',t:'Будильник-світанок',
+  f:(L,t)=>{const p=Math.min(1,(t%16)/12);const st=[[60,0,0],[255,70,10],[255,170,90],[255,225,190]];const k=p*3,i0=Math.min(2,Math.floor(k));
+   const c=mul(lerp(st[i0],st[i0+1],k-i0),.15+.85*p);L.buf.forEach((_,i)=>L.buf[i]=c);},
+  v:{F:['no','50 пікселів дають замало світла, щоб розвиднілось у кімнаті.'],M:['part','Світліше, ніж від фігури: стіна біля ліжка розвидняється. Усю кімнату освітить пізніше смуга.']}},
+ {id:'hourglass',t:'Пісочний годинник',
+  f:(L,t)=>{const p=(t%20)/20,c=hsl(120*(1-p),1,.5);clear(L);
+   if(L.grid){const lit=Math.round(256*(1-p));for(let k=0;k<lit;k++){const y=15-Math.floor(k/16),x=k%16;L.buf[y*16+x]=c;}}
+   else{const lit=Math.round(L.n*(1-p));for(let i=0;i<lit;i++)L.buf[i]=c;}},
+  v:{F:['ok','Пікселі гаснуть по одному, а колір іде від зеленого до червоного.'],M:['ok','Квадрат «висипається» рядок за рядком, колір іде від зеленого до червоного.']}},
+ {id:'snake',t:'Змійка',
+  f:(L,t,dt)=>{clear(L);if(!L.grid)return;stepSnake(dt);const set=gridSetter(L);
+   snake.body.forEach((p,i)=>set(p[0],p[1],i?[40,200,90]:[180,255,120]));set(snake.apple[0],snake.apple[1],[255,40,40]);},
+  v:{F:['no','Для ігор потрібна сітка, а фігура — це лише контур.'],M:['ok','Справжня гра на стіні, а телефон — як джойстик. Тут змійка грає сама.']}},
+ {id:'stars',t:'Зоряне небо',
+  f:(L,t)=>L.buf.forEach((_,i)=>{const s=seeds[i%256],b=Math.pow(Math.max(0,Math.sin(t*s.s+s.p)),8);L.buf[i]=mul([200,215,255],b);}),
+  v:{F:['ok','Пікселі мерехтять, як справжні зорі. Дуже красиво вночі.'],M:['ok','Квадратики мерехтять, як зорі.']}},
+ {id:'cham',t:'Хамелеон',tools:'tColor',
+  f:(L,t)=>{const b=.65+.35*Math.sin(t*2);L.buf.forEach((_,i)=>L.buf[i]=mul(chamColor,b));},
+  v:{F:['ok','Фігура стає кольору іграшки.'],M:['ok','Квадрат стає кольору іграшки.']}}
+];
+
+function stepSnake(dt){snake.t+=dt;if(snake.t<.16)return;snake.t=0;
+  const h=snake.body[0],a=snake.apple;const opts=[[1,0],[-1,0],[0,1],[0,-1]];
+  opts.sort((p,q)=>(Math.abs(h[0]+p[0]-a[0])+Math.abs(h[1]+p[1]-a[1]))-(Math.abs(h[0]+q[0]-a[0])+Math.abs(h[1]+q[1]-a[1])));
+  let nx=null;for(const o of opts){const c=[(h[0]+o[0]+16)%16,(h[1]+o[1]+16)%16];if(!snake.body.some(b=>b[0]===c[0]&&b[1]===c[1])){nx=c;break;}}
+  if(!nx||snake.body.length>40){snake.body=[[4,8],[3,8],[2,8]];return;}
+  snake.body.unshift(nx);
+  if(nx[0]===a[0]&&nx[1]===a[1]){do{snake.apple=[Math.floor(Math.random()*16),Math.floor(Math.random()*16)];}while(snake.body.some(b=>b[0]===snake.apple[0]&&b[1]===snake.apple[1]));}
+  else snake.body.pop();}
+
+// ---------- малювання сцени ----------
+const cvF=document.getElementById('cvF'),cvM=document.getElementById('cvM');
+function fit(cv){const w=cv.clientWidth,h=cv.clientHeight,dpr=devicePixelRatio||1;if(cv.width!==Math.round(w*dpr)){cv.width=Math.round(w*dpr);cv.height=Math.round(h*dpr);}
+  const ctx=cv.getContext('2d');ctx.setTransform(cv.width/CW,0,0,cv.height/CH,0,0);return ctx;}
+function scene(cv,L){
+  const ctx=fit(cv);
+  ctx.fillStyle='#161b28';ctx.fillRect(0,0,CW,CH);
+  // світло на стіні: залежить від кількості й яскравості світлодіодів
+  let s=[0,0,0];L.buf.forEach(c=>{s[0]+=c[0];s[1]+=c[1];s[2]+=c[2];});
+  const tot=(s[0]+s[1]+s[2])/765, avg=tot>0?[s[0]/tot/3,s[1]/tot/3,s[2]/tot/3].map(v=>Math.min(255,v*3)):[0,0,0];
+  const k=Math.min(1,tot/90);
+  const cx=L.grid?M.x0+M.size/2:FC.x, cy=L.grid?M.y0+M.size/2:FC.y;
+  if(k>0){const g=ctx.createRadialGradient(cx,cy,5,cx,cy,90);g.addColorStop(0,'rgba('+avg.map(Math.round).join(',')+','+(.55*k)+')');g.addColorStop(1,'rgba(0,0,0,0)');ctx.fillStyle=g;ctx.fillRect(0,0,CW,CH);}
+  // ліжко (вигляд з боку узголів'я)
+  ctx.fillStyle='#2b3142';ctx.fillRect(35,BED_TOP,90,CH-BED_TOP);
+  ctx.fillStyle='#3a4258';ctx.fillRect(35,BED_TOP,90,6);
+  ctx.fillStyle='#4a5370';ctx.beginPath();ctx.roundRect?ctx.roundRect(52,BED_TOP-7,56,10,4):ctx.rect(52,BED_TOP-7,56,10);ctx.fill();
+  ctx.fillStyle='#8892a8';ctx.font='3.4px "Golos Text",sans-serif';ctx.textAlign='center';ctx.fillText('ліжко 90 см',80,BED_TOP+16);
+  if(L.grid){
+    ctx.fillStyle='#0b0d13';ctx.fillRect(M.x0-1.5,M.y0-1.5,M.size+3,M.size+3);
+    const c=M.size/16;
+    L.buf.forEach((col,i)=>{const x=M.x0+L.gx[i]*c,y=M.y0+L.gy[i]*c;
+      ctx.fillStyle=col[0]+col[1]+col[2]>6?'rgb('+col.map(v=>Math.round(Math.min(255,v))).join(',')+')':'#1b1f2b';
+      ctx.fillRect(x+.25,y+.25,c-.5,c-.5);});
+    dim(ctx,M.x0,M.y0+M.size+3.5,M.size,'53 см');
+  }else{
+    ctx.fillStyle='#232838';ctx.fillRect(BOARD.x0,BOARD.y0,BOARD.w,BOARD.h);
+    ctx.strokeStyle='#384057';ctx.lineWidth=.6;ctx.strokeRect(BOARD.x0,BOARD.y0,BOARD.w,BOARD.h);
+    ctx.strokeStyle='#4b5470';ctx.lineWidth=.35;ctx.beginPath();L.pts.forEach((p,i)=>i?ctx.lineTo(p[0],p[1]):ctx.moveTo(p[0],p[1]));ctx.stroke();
+    L.buf.forEach((col,i)=>{const p=L.pts[i],on=col[0]+col[1]+col[2]>6;
+      if(on){const g=ctx.createRadialGradient(p[0],p[1],0,p[0],p[1],4);const cs=col.map(v=>Math.round(Math.min(255,v))).join(',');g.addColorStop(0,'rgba('+cs+',.9)');g.addColorStop(1,'rgba('+cs+',0)');ctx.fillStyle=g;ctx.beginPath();ctx.arc(p[0],p[1],4,0,7);ctx.fill();}
+      ctx.fillStyle=on?'rgb('+col.map(v=>Math.round(Math.min(255,v*0.6+100))).join(',')+')':'#3a4157';ctx.beginPath();ctx.arc(p[0],p[1],1.1,0,7);ctx.fill();});
+    dim(ctx,BOARD.x0,BOARD.y0+BOARD.h+3.5,BOARD.w,'80 см');
+  }
+  // масштаб
+  ctx.strokeStyle='#8892a8';ctx.lineWidth=.5;ctx.beginPath();ctx.moveTo(4,CH-5);ctx.lineTo(29,CH-5);ctx.moveTo(4,CH-6.5);ctx.lineTo(4,CH-3.5);ctx.moveTo(29,CH-6.5);ctx.lineTo(29,CH-3.5);ctx.stroke();
+  ctx.fillStyle='#8892a8';ctx.textAlign='left';ctx.fillText('25 см',8,CH-7.5);
+}
+function dim(ctx,x,y,w,label){ctx.strokeStyle='#8892a8';ctx.lineWidth=.4;ctx.beginPath();ctx.moveTo(x,y);ctx.lineTo(x+w,y);ctx.moveTo(x,y-1.2);ctx.lineTo(x,y+1.2);ctx.moveTo(x+w,y-1.2);ctx.lineTo(x+w,y+1.2);ctx.stroke();
+  ctx.fillStyle='#aab3c7';ctx.textAlign='center';ctx.font='3.4px "Golos Text",sans-serif';ctx.fillText(label,x+w/2,y-1.5);}
+
+// ---------- інтерфейс ----------
+let cur=DEMOS[0],t0=performance.now(),last=t0;
+const demosEl=document.getElementById('demos');
+DEMOS.forEach(d=>{const b=document.createElement('button');b.type='button';b.textContent=d.t;b.setAttribute('aria-pressed',String(d===cur));
+  b.addEventListener('click',()=>{cur=d;t0=performance.now();demosEl.querySelectorAll('button').forEach(x=>x.setAttribute('aria-pressed',String(x===b)));ui();});demosEl.appendChild(b);});
+function chip(v){return '<span class="chip '+v[0]+'">'+({ok:'Працює',part:'Простіше',no:'Не вийде'})[v[0]]+'</span><span>'+v[1]+'</span>';}
+function ui(){['tDraw','tGuess','tColor'].forEach(id=>document.getElementById(id).hidden=cur.tools!==id);
+  document.getElementById('vF').innerHTML=chip(cur.v.F);document.getElementById('vM').innerHTML=chip(cur.v.M);}
+const PAL=['#ff3b3b','#ff9f1c','#ffe14d','#3ddc84','#36c5f0','#5b6cff','#c86bff','#ffffff'];
+const palEl=document.getElementById('palette');
+PAL.forEach((c,i)=>{const b=document.createElement('button');b.type='button';b.className='sw';b.style.background=c;b.setAttribute('aria-label','Колір '+c);b.setAttribute('aria-pressed',String(i===0));
+  b.addEventListener('click',()=>{drawColor=hex(c);palEl.querySelectorAll('.sw').forEach(x=>x.setAttribute('aria-pressed',String(x===b)));});palEl.appendChild(b);});
+drawColor=hex(PAL[0]);
+document.getElementById('clear').addEventListener('click',()=>{LM.draw.fill(null);LF.draw.fill(null);});
+function toCm(cv,e){const r=cv.getBoundingClientRect();return [(e.clientX-r.left)/r.width*CW,(e.clientY-r.top)/r.height*CH];}
+cvM.addEventListener('click',e=>{if(cur.id!=='draw')return;const [x,y]=toCm(cvM,e),c=M.size/16;const gx=Math.floor((x-M.x0)/c),gy=Math.floor((y-M.y0)/c);
+  if(gx>=0&&gx<16&&gy>=0&&gy<16){const i=gy*16+gx;LM.draw[i]=LM.draw[i]&&LM.draw[i].join()===drawColor.join()?null:drawColor;}});
+cvF.addEventListener('click',e=>{if(cur.id!=='draw')return;const [x,y]=toCm(cvF,e);let bi=-1,bd=6;
+  LF.pts.forEach((p,i)=>{const d=Math.hypot(p[0]-x,p[1]-y);if(d<bd){bd=d;bi=i;}});if(bi>=0)LF.draw[bi]=LF.draw[bi]&&LF.draw[bi].join()===drawColor.join()?null:drawColor;});
+const msg=document.getElementById('guessMsg');
+document.getElementById('check').addEventListener('click',()=>{const g=parseInt(document.getElementById('guess').value,10);
+  if(!(g>=1&&g<=99)){msg.textContent='Впиши число від 1 до 99.';return;}
+  lastGuess=g;result=secret>g?'more':secret<g?'less':'ok';resultAt=(performance.now()-t0)/1000;
+  msg.textContent=result==='more'?'Загадане число більше.':result==='less'?'Загадане число менше.':'Вгадала! Це '+secret+'.';});
+document.getElementById('newGame').addEventListener('click',()=>{secret=1+Math.floor(Math.random()*99);lastGuess=null;result=null;msg.textContent='Нове число загадане.';});
+document.getElementById('cham').addEventListener('input',e=>{chamColor=hex(e.target.value);});
+document.getElementById('shape').addEventListener('click',e=>{shapeIdx=(shapeIdx+1)%SHAPES.length;LF=mkFigure();e.target.textContent='Інша фігура (зараз: '+SHAPES[shapeIdx].name+')';});
+document.getElementById('shape').textContent='Інша фігура (зараз: '+SHAPES[shapeIdx].name+')';
+
+function frame(now){const t=(now-t0)/1000,dt=Math.min(.1,(now-last)/1000);last=now;
+  cur.f(LF,t,dt);cur.f(LM,t,dt);scene(cvF,LF);scene(cvM,LM);requestAnimationFrame(frame);}
+ui();requestAnimationFrame(frame);
+
+// ---------- таблиця ідей ----------
+const T=[
+ ['Основа'],
+ ['Плавно вмикається і гасне','ok','','ok',''],
+ ['Ефекти: веселка, мерехтіння, «дихання»','ok','','ok',''],
+ ['Твої ідеї'],
+ ['Оплески, пульт, телефон, рух','ok','керувати можна однаково','ok','керувати можна однаково'],
+ ['Малювання з телефона','part','фарбуєш окремі пікселі','ok','будь-яка картинка'],
+ ['«Вгадай число»','part','тільки кольором','ok','число й стрілка'],
+ ['Світломузика','part','спалахує в такт','ok','стовпчики еквалайзера'],
+ ['Будильник-світанок','no','замало світла','part','стіна біля ліжка розвидняється'],
+ ['Світло при відключенні','no','замало світла','part','як нічник'],
+ ['Голос («привіт», «бувай», «гра»)','ok','','ok',''],
+ ['Ще ідеї'],
+ ['Пісочний годинник для справ','ok','пікселі гаснуть по одному','ok','квадрат «висипається»'],
+ ['Захід сонця перед сном','ok','','ok',''],
+ ['Погода зранку','part','тільки кольором','ok','сонце, хмара, дощ'],
+ ['Годинник і відлік днів','no','','ok','цифри'],
+ ['Повітря в кімнаті («провітри»)','part','кольором','ok','колір і число'],
+ ['Сигнал «кличуть вечеряти»','ok','','ok',''],
+ ['Хамелеон (колір іграшки)','ok','','ok',''],
+ ['Зоряне небо','ok','особливо красиво','ok',''],
+ ['Щоденник настрою','part','кожен піксель — день','ok','мозаїка місяця'],
+ ['Запам\'ятай послідовність','part','кольорами','ok','кольорами й фігурами'],
+ ['Хто швидше','part','','ok',''],
+ ['Мультик на стіні','no','','ok','покадрово'],
+ ['Змійка, піксельний улюбленець','no','','ok',''],
+ ['Лампа дружби','ok','','ok','']
+];
+const S={ok:'✅',part:'⚠️',no:'❌'};
+document.getElementById('tbl').innerHTML=T.map(r=>r.length===1?'<tr><td class="g" colspan="3">'+r[0]+'</td></tr>':
+  '<tr><td>'+r[0]+'</td><td><span class="m '+r[1]+'">'+S[r[1]]+'</span>'+(r[2]?'<small>'+r[2]+'</small>':'')+'</td><td><span class="m '+r[3]+'">'+S[r[3]]+'</span>'+(r[4]?'<small>'+r[4]+'</small>':'')+'</td></tr>').join('');
+})();
+</script>
+</body>
+</html>
